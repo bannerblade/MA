@@ -8,6 +8,7 @@ import graph.Link;
 import graph.VNF;
 
 public class Sfc implements Serializable {
+	private static final int Max = 100000 ;
 	public int ID;
 	public Collection<VNF> VNFset = new HashSet<>();//这个容器存VNF
 	public Collection<Link> linkset = new HashSet<>();//这个容器存有向边 带宽需求20-60
@@ -41,6 +42,16 @@ public class Sfc implements Serializable {
 	}
 	public int getState(){return this.state;}
 	public void setState(int state){this.state = state;}
+
+	public void initial_sfc(){
+		this.state = 0;
+		for(VNF tmp_vnf:VNFset){
+			tmp_vnf.embedID = Max;
+		}
+		for(Link tmp_l:linkset){
+			tmp_l.setstate(0);
+		}
+	}
 
 	public Object deepClone() throws Exception{
 		//把对象写到流里

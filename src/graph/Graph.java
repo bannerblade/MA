@@ -10,6 +10,7 @@ import java.util.Iterator;
  * @ date 2020/3/12
  */
 public class Graph implements Serializable {
+    private static final int Max = 100000 ;
     private int switchnum = 6;//节点数目
     private int linknum;//边数目
     public Collection<Switch> switchset = new HashSet<>();//这个容器存switch[节点数目]
@@ -179,6 +180,18 @@ public class Graph implements Serializable {
         }
     }
 
+    public void recoverResourceCapacity(){//恢复G的资源容量
+        for(Switch sw:switchset){
+            for(VNF tp_vnf:sw.VNFset){
+                tp_vnf.cost = 0;
+                //tp_vnf.embedID = Max;
+            }
+        }
+        for(Link tmp_l:rlinkset){
+            tmp_l.cost = 0;
+        }
+        ///光链路缺
+    }
 
     //统计收益
     public int getMaxUtility(){
@@ -232,17 +245,41 @@ public class Graph implements Serializable {
     public void G_copy(Graph Ga){
         this.switchnum = Ga.switchnum;
         this.linknum = Ga.linknum;
+
         switchset.clear();
-        switchset.addAll(Ga.switchset);
+        for(Switch tmp_sw: Ga.switchset){
+            switchset.add(new Switch(tmp_sw.getID(), tmp_sw.getstate(), tmp_sw.PW));
+            for(VNF tmp_vnf:tmp_sw.VNFset){
+                for(Switch sw1:switchset){
+                    if(sw1.getID() == tmp_sw.getID()){
+                        sw1.VNFset.add(new VNF(tmp_vnf.getID(), tmp_vnf.getVNFtype(),tmp_vnf.getVNFcapacity(), tmp_vnf.cost, tmp_vnf.getprice(),tmp_vnf.getState(), tmp_vnf.embedID, tmp_vnf.VPW));
+                    }
+                }
+            }
+        }
+
+
 
         elinkset.clear();
-        elinkset.addAll(Ga.elinkset);
+        for(Elink tmp_elink:Ga.elinkset){
+            elinkset.add(new Elink(tmp_elink.getid(), tmp_elink.getsrcid(), tmp_elink.getdstid(),tmp_elink.getBandwidth(),tmp_elink.getType()));
+        }
+
+
 
         olinkset.clear();
-        olinkset.addAll(Ga.olinkset);
+        for(Olink tmp_olink:Ga.olinkset){
+            olinkset.add(new Olink(tmp_olink.getid(), tmp_olink.getsrcid(),tmp_olink.getdstid(),tmp_olink.getBandwidth(),tmp_olink.getType(),tmp_olink.getWave(),tmp_olink.rlinkID));
+        }
+
+
 
         rlinkset.clear();
-        rlinkset.addAll(Ga.rlinkset);
+        for(Link tmp_rl:Ga.rlinkset){
+            rlinkset.add(new Link(tmp_rl.getid(),tmp_rl.getsrcid(),tmp_rl.getdstid(),tmp_rl.cost,tmp_rl.getPrice(),tmp_rl.getBandwidth(),tmp_rl.getstate(),tmp_rl.getType(),tmp_rl.getWave(),tmp_rl.getO_total_price()));
+        }
+
+
 
         this.rlinknum.clear();
         this.rlinknum.addAll(Ga.rlinknum);
@@ -263,4 +300,5 @@ public class Graph implements Serializable {
 
         return (oi.readObject());
     }
+
 }

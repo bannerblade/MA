@@ -1,10 +1,12 @@
 package graph;
 
+import java.io.Serializable;
+
 /**
  * @ author bannerblade
  * @ date 2020/3/9
  */
-public class VNF {
+public class VNF implements Serializable {
     private static final int Max = 100000 ;
 
     private  int ID;
@@ -35,6 +37,17 @@ public class VNF {
         this.state = 0;
     }
 
+    public VNF(int ID,int VNFtype, int VNFcapacity, int cost, int price,int state, int embedID, int VPW){
+        this.ID = ID;
+        this.VNFtype = VNFtype;
+        this.VNFcapacity = VNFcapacity;
+        this.price = price;
+        this.state = state;
+        this.cost = cost;
+        this.embedID = embedID;
+        this.VPW = VPW;
+    }
+
     public VNF(int ID){
         this.ID = ID;
     }
@@ -58,7 +71,7 @@ public class VNF {
         this.VNFtype = VNFtype ;
     }
 
-    public double getVNFcapacity(){
+    public int getVNFcapacity(){
         return this.VNFcapacity;
     }
 

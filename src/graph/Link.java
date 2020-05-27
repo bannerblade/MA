@@ -1,6 +1,7 @@
 package graph;
+import java.io.*;
 
-public class Link {
+public class Link implements Serializable{
 	private int ID;
 	private int src;
 	private int dst;
@@ -29,6 +30,20 @@ public class Link {
 		this.type = type;
 		this.wave = 1000;
 		this.O_total_price = op ;
+	}
+
+	public Link (int id,int src , int dst, int in_cost, int in_price, int Bandwidth,int in_state, int type, int inwave,int op){
+		this.ID = id;
+		this.src = src;
+		this.dst = dst;
+		this.Bandwidth = Bandwidth;//500 电链路初始化图的边的带宽大小
+		this.type = type;
+		this.wave = 1000;
+		this.O_total_price = op ;
+		this.cost = in_cost;
+		this.price = in_price;
+		this.state = in_state;
+		this.wave = inwave;
 	}
 
 	public Link(int id){

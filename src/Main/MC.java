@@ -31,8 +31,8 @@ public class MC {
         //初始化MC，最开始的启动
         //节点初始化，开启了全部节点的VNF和电链路
         for(Switch tmp:G.switchset){
+            tmp.setstate(1);
             if(tmp.getID() == 0 ||tmp.getID() == 2 ||tmp.getID() == 4 ){
-                tmp.setstate(1);//tmp.setstate(1);
                 for(VNF tmp_vnf:tmp.VNFset){
                     tmp_vnf.setState(1);//tmp_vnf.setState(1);
                 }
@@ -50,7 +50,6 @@ public class MC {
     //找最短路
         Collection<Link> linksets = new HashSet<>();//存结果
         Collection<Link> linksets_fall = new HashSet<>();//若失败，返回这个结果
-        //Collection<Link> linksets_fall = null;//若失败，返回这个结果
         Collection<Nodes> nodesets = new HashSet<>();//中间变量集合，存结果的
         int k = -1 ;//一个中间变量,前置节点
         int flag_success = 0;//看能不能找到一条路，成功为1；
@@ -145,215 +144,113 @@ public class MC {
 
     }
 
-    Graph deploy_piar(VNF src , VNF dst, Link link, Collection<VNF> VNFsets, Graph G){
-        //映射一对piar
-        ///这个VNFsets 存映射过的VNF。
-        Graph G_copy = new Graph();
-        Graph G_self = new Graph();
-        G_copy.G_copy(G);//G_copy = G;
-        G_self.G_copy(G);//G_self = G;//失败返回一个和G一样的图
-        int flag_s = 0, flag_d = 0;
-        int flag_success = 1;//看这次映射是否成功
-
-        if( !VNFsets.isEmpty() ){
-            for(VNF tmp:VNFsets){
-                if(tmp.getID() == src.getID()){
-                    flag_s = 1;
-                }
-                if(tmp.getID() == dst.getID()){
-                    flag_d = 1;
-                }
-            }
-        }
-
-        //dst没被映射
-        if(flag_d == 0){
-            for(Switch tmp_s:G_copy.switchset){
-                if(tmp_s.getstate() == 1){
-                    for(VNF tmp_vnf:tmp_s.VNFset){
-                        if((tmp_vnf.VNFcapacity - tmp_vnf.cost) >= dst.VNFcapacity && tmp_vnf.getVNFtype() == dst.getVNFtype() && tmp_vnf.getState() == 1){
-                            tmp_vnf.cost += dst.VNFcapacity;//图G——copy扣除消耗资源
-                            VNFsets.add(dst);//标记映射
-                            flag_d = 1;
-                            dst.embedID = tmp_s.getID();//在VNF上登记其映射到的点的ID
-                            break;
-                        }
-                    }
-                }
-                if(flag_d == 1) break;
-            }
-        }
-        //src没有被映射了
-        if(flag_s == 0 ){
-            for(Switch tmp_s:G_copy.switchset){
-                if(tmp_s.getstate() == 1){
-                    for(VNF tmp_vnf:tmp_s.VNFset){
-                        if((tmp_vnf.VNFcapacity - tmp_vnf.cost) >= src.VNFcapacity && tmp_vnf.getVNFtype() == src.getVNFtype() && tmp_vnf.getState() == 1){
-                            tmp_vnf.cost += src.VNFcapacity;//图G——copy扣除消耗资源
-                            VNFsets.add(src);//标记映射
-                            flag_s = 1;
-                            src.embedID = tmp_s.getID();//在VNF上登记其映射到的点的ID
-                            break;
-                        }
-                    }
-                }
-                if(flag_s == 1) break;
-            }
-        }
-        //src和dst都被映射了
-        if(flag_s == 1 && flag_d == 1){
-            if(src.embedID == dst.embedID && src.embedID != Max){//映射到一个点上了
-                link.setstate(1);
-            }else{//没有映射到一个点
-                Collection<Link> tmp_e_sets = new HashSet<>();//存带宽合适的边
-                for(Link tmp_e:G_copy.rlinkset){
-                    if((tmp_e.getBandwidth()-tmp_e.cost) >= link.getBandwidth()){
-                        tmp_e_sets.add(tmp_e);
-                    }
-                }
-                Collection<Link> tmp_linksets = new HashSet<>();//返回映射结果的边集装到这个里面
-                tmp_linksets = dijkstra(src.embedID,dst.embedID,tmp_e_sets,G_copy.getSwitchnum());//输入源目的VNF和边集，返回路径边集合
-
-////
-                for(Link ll:tmp_linksets){
-                    if(ll.getid() == Max){
-                        flag_success = 0;//映射失败
-                    }
-                }
-
-                if(flag_success == 0){
-                    System.out.println("mark-2, dijsktra没用找到通路，失败了");
-                }else {
-                   // System.out.println("mark-3, 成功了。有边：" + tmp_linksets.size());
-                    for(Link e1:tmp_linksets){
-                        for(Link e2:G_copy.rlinkset){
-                            if(e1.getid() == e2.getid()){
-                                e2.cost += link.getBandwidth();
-                            }
-                        }
-                    }
-                }
- ////
-            }
-        }else {//到最后，两个点有一个没有被映射，则失败
-            flag_success = 0;
-        }
-
-        if(flag_success == 1) {
-            G_copy.em_flag = 1;
-            return G_copy;
-        }else {//失败
-            G_self.em_flag = 0;
-            //System.out.println("本次pair映射失败了");
-            return G_self;
-        }
-    }
-
     Graph deploy_SFC(Graph G, Collection<Sfc> SFCsets){
-        Graph G_copy = new Graph();//映射成功会让G = G_copy
-        G_copy.G_copy(G);//G_copy = G;
+        Graph G_desfc = new Graph();
+        G_desfc.G_copy(G);
+
+        Graph graph = new Graph();
+
+        Collection<Link> tmpESets = new HashSet<>();//存带宽合适的边
+        Collection<Link> DijESets = new HashSet<>();//存带宽合适的边
 
         for(Sfc tmp_sfc:SFCsets){
             //取出一条sfc进行映射操作
-            //从link找VNF
-            Collection<VNF> embeded_VNFsets = new HashSet<>();//这个存本次映射，SFC映射了的的VNF，标记VNF映射的
-            int flag_sfc = 1;//看本次映射是否成功的
-
-            Graph G_tp = new Graph();//中间变量
-            G_tp.G_copy(G_copy);
-
-            for(Link tmp_lin:tmp_sfc.linkset){//取出这条sfc的每一个有向link进行映射
-                for(VNF tmp_v1:tmp_sfc.VNFset){
-                    for(VNF tmp_v2:tmp_sfc.VNFset){
-                        if(tmp_v1.getID() == tmp_lin.getsrcid() && tmp_v2.getID() == tmp_lin.getdstid()){
-                            Graph G_tmp ;//中间变量,5/5
-                            G_tmp = deploy_piar(tmp_v1, tmp_v2 , tmp_lin, embeded_VNFsets, G_tp);
-                            //若映射成功，下面是对g_tp资源更新
-                            if(G_tmp.em_flag == 1){
-
-                                Graph G_copy_2 = new Graph();
-                                G_copy_2.G_copy(G_tp);//G_copy_2这给没什么用，不用管。
-                                //G_copy_2目的是把映射了的VNF装进embeded_VNFsets
-
-                                tmp_lin.setstate(1);//表示SFC的这条边映射成功了
-
-                                G_tp.G_copy(G_tmp);//中间变量更新
-
-                                //下面这堆操作是，把映射的VNF记录其映射的点。这可以用pair再图上操作。
-                                int flag_s = 0, flag_d = 0;
-                                if( !embeded_VNFsets.isEmpty() ){
-                                    for(VNF tmp:embeded_VNFsets){
-                                        if(tmp.getID() == tmp_v1.getID()){
-                                            flag_s = 1;//源节点已经映射
-                                        }
-                                        if(tmp.getID() == tmp_v2.getID()){
-                                            flag_d = 1;//目的节点已经映射
-                                        }
-                                    }
-                                }
-                                //dst没被映射,把dst映射信息写入
-                                if(flag_d == 0){
-                                    for(Switch tmp_s:G_copy_2.switchset){
-                                        if(tmp_s.getstate() == 1){
-                                            for(VNF tmp_vnf:tmp_s.VNFset){
-                                                if((tmp_vnf.VNFcapacity - tmp_vnf.cost) >= tmp_v2.VNFcapacity && tmp_vnf.getVNFtype() == tmp_v2.getVNFtype() && tmp_vnf.getState() == 1){
-                                                    tmp_vnf.cost += tmp_v2.VNFcapacity;//图G——copy扣除消耗资源
-                                                    embeded_VNFsets.add(tmp_v2);//标记映射
-                                                    flag_d = 1;
-                                                    tmp_v2.embedID = tmp_s.getID();//在VNF上登记其映射到的点的ID
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        if(flag_d == 1) break;
-                                    }
-                                }
-                                //src更新映射信息
-                                if(flag_s == 0 ){
-                                    for(Switch tmp_s:G_copy_2.switchset){
-                                        if(tmp_s.getstate() == 1){
-                                            for(VNF tmp_vnf:tmp_s.VNFset){
-                                                if((tmp_vnf.VNFcapacity - tmp_vnf.cost) >= tmp_v1.VNFcapacity && tmp_vnf.getVNFtype() == tmp_v1.getVNFtype() && tmp_vnf.getState() == 1){
-                                                    tmp_vnf.cost += tmp_v1.VNFcapacity;//图G——copy扣除消耗资源
-                                                    embeded_VNFsets.add(tmp_v1);//标记映射
-                                                    flag_s = 1;
-                                                    tmp_v1.embedID = tmp_s.getID();//在VNF上登记其映射到的点的ID
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        if(flag_s == 1) break;
-                                    }
-                                }
-                            }else{
-                                flag_sfc = 0;
-                                //System.out.print("映射失败了");
-                                //break;//本次映射失败
+            graph.G_copy(G_desfc);//每次映射先复制一份网络，对复制的网络操作
+            //先映射点
+            int flagSfc=1;
+            for(VNF sfcVNF:tmp_sfc.VNFset){
+                for(Switch sw:graph.switchset){
+                    if(sw.getstate() == 1){
+                        for(VNF swVNF:sw.VNFset){
+                            if(swVNF.getVNFtype() == sfcVNF.getVNFtype() && (swVNF.VNFcapacity-swVNF.cost)>=sfcVNF.VNFcapacity &&swVNF.getState() == 1){
+                                swVNF.cost += sfcVNF.VNFcapacity;
+                                sfcVNF.embedID = sw.getID();
+                                break;
                             }
-                            break;
                         }
                     }
-                    if(flag_sfc == 0){
-                        break;
-                    }
+                    if(sfcVNF.embedID != Max) break;
                 }
-                if(flag_sfc == 0){
+                if(sfcVNF.embedID == Max){
+                    flagSfc = 0;
                     break;
                 }
             }
-            if(flag_sfc == 1){
-                G_copy.G_copy(G_tp);
-                G_copy.sfc_num++;//映射成功加1
+            if(flagSfc == 0) continue;//失败就跳过这次映射
+            //映射边
+            int LFindFlag;
+            for(Link sfcLink:tmp_sfc.linkset){
+                LFindFlag = 0;
+                for(VNF tmpVNFsrc:tmp_sfc.VNFset){
+                    for(VNF tmpVNFdst:tmp_sfc.VNFset){
+                        if(tmpVNFsrc.getID() == sfcLink.getsrcid() && tmpVNFdst.getID() == sfcLink.getdstid()){
+                            LFindFlag = 1;
+                            if(tmpVNFsrc.embedID == tmpVNFdst.embedID && tmpVNFdst.embedID != Max){
+                                sfcLink.setstate(1);//表示映射成功
+                            }else{
+                                for(Link gRlink:graph.rlinkset){//找出带宽合适的边
+                                    if((gRlink.getBandwidth() - gRlink.cost) >= sfcLink.getBandwidth()){
+                                        tmpESets.add(gRlink);
+                                    }
+                                }
+                                //找路dijkstra(int src_embedID, int dst_embedID, Collection<Link> in_linkstes, int node_num)
+                                DijESets = dijkstra(tmpVNFsrc.embedID,tmpVNFdst.embedID,tmpESets,6);
+                                for(Link dlink:DijESets){
+                                    if(dlink.getid() == Max){
+                                        flagSfc = 0;//映射失败
+                                    }
+                                }
+                                if(flagSfc != 0){//找路成功，更新资源
+                                    sfcLink.setstate(1);
+                                    ///
+                                    System.out.println("SFC的ID: " + tmp_sfc.ID + "他的ID是 "+sfcLink.getid() + "的边映射");
+                                    System.out.println("用了这些边：");
+                                    ///
+                                    for(Link e1:DijESets){
+                                        //
+                                        System.out.println(e1.getid());
+                                        //
+                                        for(Link e2:graph.rlinkset){
+                                            if(e1.getid() == e2.getid()){
+                                                e2.cost += sfcLink.getBandwidth();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                DijESets.clear();
+                                break;
+                            }
+                        }
+                    }
+                    if(LFindFlag == 1) break;
+                }
+                tmpESets.clear();
+                if(flagSfc == 0) break;
             }
+
+            if(flagSfc == 0){
+                continue;
+            }else{
+                G_desfc.G_copy(graph);
+                G_desfc.sfc_num++;
+                tmp_sfc.setState(1);
+            }
+
+
         }
-        return G_copy;
+
+        return G_desfc;
     }
 
 
-    Graph MCstart(){
+    void MCstart() throws Exception{
         Graph G_tmp = new Graph();
         Graph G_return = new Graph();//结果存在在这里面返回
+        
+        Graph G_new = new Graph();
 
+        int count=0;
         //MC启动,资源开闭（更新操作在这里进行）----》资源网络的更新Dcf
         for(Switch tmp_sw:G.switchset){//对所有点进行资源转换操作
             Random r = new Random();
@@ -367,106 +264,33 @@ public class MC {
                     }
                 }
             }
+
             //Dcf确定后，部署sfc
             G_tmp = deploy_SFC(G,sfcsets);
 
-            if(G_tmp.getMaxUtility() < 0 && tmp_sw.getID() == 0){
+
+            if(count == 0){
                 G_return.G_copy(G_tmp);
             }
 
-
-            if(TimerValue(G_return) < TimerValue(G_tmp) && G_tmp.getMaxUtility() >= 0){
+            if(TimerValue(G_return) < TimerValue(G_tmp) ){//&& G_tmp.getMaxUtility() >= 0
                 G_return.G_copy(G_tmp);
             }
 
-
-
-        }
-
-        //对光链路层进行资源转化操作
-        //选两个活跃节点建立或者拆除
-        Collection<Link> tmp_linksets = new HashSet<>();//返回映射结果的边集装到这个里面
-        int flag_success_op = 1;//砍光路是否建立成功的。
-        int flag_r1 = 0,flag_r2 = 0;//随机选两个节点
-        Random r = new Random();
-        int r1,r2,r_b;
-        r1 = r.nextInt(G.getSwitchnum());
-        r2 = r.nextInt(G.getSwitchnum());
-        while(r1 == r2){
-            r2 = r.nextInt(G.getSwitchnum());
-        }
-
-        Collection<Link> tmp_O_lin = new HashSet<>();
-        r_b = r.nextInt(3);//任意选一个波长
-
-        //看是否已经有光通路了
-        int flag_on = 0;
-        for(Link tmp_r2:G.rlinkset){
-            if(tmp_r2.getsrcid() == r1 && tmp_r2.getdstid() == r2 && tmp_r2.getType() ==(50+r_b)){
-                flag_on = 1;
-            }
-        }
-        //更新操作，开了的关，关了的开。
-        if(flag_on == 0){//没有光通路，建立光通路
-            for(Olink tmp:G.olinkset){
-                if(tmp.getWave() == r_b){
-                    tmp_O_lin.add(new Link(tmp.getid(), tmp.getsrcid(), tmp.getdstid(), tmp.getBandwidth(), tmp.getType()));
-                }
-            }
-            tmp_linksets = dijkstra(r1, r2, tmp_O_lin, G.getSwitchnum());//找出r1,r2之间的最短路
-            for(Link l2:tmp_linksets){
-                if(l2.getid() == Max){//无最短路
-                    flag_success_op = 0;
-                   // System.out.println("光通路建立这里，失败了");
-                    break;
-                }
-            }
-
-            if(flag_success_op == 1){
-                int tmp_price = 0;
-                if(tmp_linksets.size() > 1){
-                    tmp_price = (tmp_linksets.size()-2)*2 + 40;
-                }else{
-                    tmp_price = 40;
-                }
-
-                for(Link tmp_l:tmp_linksets){//建立通路
-                    for(Olink tmp:G.olinkset){
-                        if(tmp.getWave() == r_b && tmp.getid() == tmp_l.getid()){
-                            tmp.setstate(1);
-                            tmp.rlinkID = G.rlinkset.size();//标记这些已用，并且标记其参与搭建的rlink
-                        }
+            //恢复，把这次动作恢复
+            for(VNF tmp_v:tmp_sw.VNFset){//节点VNF状态更新
+                if(tmp_v.getID() == r_id){//随机选一个VNF
+                    if(tmp_v.getState() == 1){
+                        tmp_v.setState(0);
+                    }else{
+                        tmp_v.setState(1);
                     }
                 }
-                G.rlinkset.add(new Link(G.rlinkset.size(), r1, r2, 2000, 50+r_b, tmp_price));
             }
-        }else{//有光通路，拆除 //olink里存路径搭建信息和对应的rlink ID号，拆的时候按ID来排查拆除。
-            int tmp_rid = Max;
-            Iterator i = G.rlinkset.iterator();
-            Link tmp_rl = new Link();
-            while(i.hasNext()){
-                tmp_rl = (Link) i.next();
-                if(tmp_rl.getType() == (50+r_b)){
-                    tmp_rid = tmp_rl.getid();
-                    i.remove();
-                }
-            }
-            for(Olink tmp:G.olinkset){
-                if(tmp.rlinkID == tmp_rid && tmp.getWave()== r_b){
-                    tmp.setstate(0);
-                }
-            }
-        }
-        //Dcf确定后，部署sfc
-        G_tmp = deploy_SFC(G,sfcsets);
-
-
-        if(TimerValue(G_return) < TimerValue(G_tmp) && G_tmp.getMaxUtility() >= 0){
-               G_return.G_copy(G_tmp);
+            count++;
         }
 
-
-        return G_return;
+        G = (Graph) G_return.deepClone();
     }
 
     public double TimerValue(Graph graph){

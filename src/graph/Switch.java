@@ -1,5 +1,6 @@
 package graph;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Random;
@@ -8,10 +9,10 @@ import java.util.Random;
  * @ author bannerblade
  * @ date 2020/3/10
  */
-public class Switch {
+public class Switch implements Serializable {
     private int ID;
     private int state;//交换机使用状态，on = 1,off =0;
-    public int PW = 100;//交换机开启功耗，损耗
+    public int PW = 30;//交换机开启功耗，损耗100
     public Collection<VNF> VNFset = new HashSet<>();//这个容器存VNF，三个VNF，固定
     //public Collection<VNF> embed_VNFsets = new HashSet<>();//这个容器存SFC的VNF，表示映射到这个点上
 
@@ -41,10 +42,17 @@ public class Switch {
         }
     }
 
+    public Switch (int ID,int state, int in_PW){
+        this.ID = ID;
+        this.state = state;
+        this.PW = in_PW;
+    }
+
     public Switch (){}
 
     public int getstate(){return this.state;}
     public void setstate (int state){this.state = state;}
+
 
     @Override
     public int hashCode() {

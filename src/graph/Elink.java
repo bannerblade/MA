@@ -1,5 +1,7 @@
 package graph;
 
+import java.io.Serializable;
+
 /**
  * @ author bannerblade
  * @ date 2020/3/18
