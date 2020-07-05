@@ -27,8 +27,8 @@ public class Switch implements Serializable {
 
     public void setVNFs(){
         for(int i=0;i<3;i++){
-            Random r = new Random();
-            VNFset.add(    new VNF(i, r.nextInt(5), r.nextInt(50) + 100, r.nextInt(5)+5));
+            Random r = new Random();//VNF price 以前是 r.nextInt(5)+5)
+            VNFset.add(    new VNF(i, r.nextInt(5), r.nextInt(50) + 100, r.nextInt(5)*10+200));
         }
     }
 

@@ -19,10 +19,12 @@ public class MC {
     private static final double beta = 1;
     public Graph G = new Graph();
     public Collection<Sfc> sfcsets = new HashSet<>();
+    public Collection<Sfc> ResSfcsets = new HashSet<>();////ResSfcsets装关联sfc
 
     public MC(Graph Ga, Collection<Sfc> sfcset){
         G.G_copy(Ga);
         sfcsets.addAll(sfcset);
+        ResSfcsets.addAll(sfcset);
     }
 
     public MC(){}
@@ -32,9 +34,15 @@ public class MC {
         //节点初始化，开启了全部节点的VNF和电链路
         for(Switch tmp:G.switchset){
             tmp.setstate(1);
-            if(tmp.getID() == 0 ||tmp.getID() == 2 ||tmp.getID() == 4 ){
+            if(tmp.getID() == 0 ||tmp.getID() == 2){
                 for(VNF tmp_vnf:tmp.VNFset){
-                    tmp_vnf.setState(1);//tmp_vnf.setState(1);
+                    if(tmp_vnf.getID() == 1 | tmp_vnf.getID() == 2)
+                    tmp_vnf.setState(1);
+                }
+            }else{
+                for(VNF tmp_vnf:tmp.VNFset){
+                    if(tmp_vnf.getID() == 1)
+                        tmp_vnf.setState(1);
                 }
             }
         }
@@ -151,9 +159,12 @@ public class MC {
         Graph graph = new Graph();
 
         Collection<Link> tmpESets = new HashSet<>();//存带宽合适的边
-        Collection<Link> DijESets = new HashSet<>();//存带宽合适的边
+        Collection<Link> DijESets = new HashSet<>();
 
         for(Sfc tmp_sfc:SFCsets){
+            System.out.println();
+            System.out.println("==================================");
+            System.out.println("SFC的ID: " + tmp_sfc.ID + " 的映射");
             //取出一条sfc进行映射操作
             graph.G_copy(G_desfc);//每次映射先复制一份网络，对复制的网络操作
             //先映射点
@@ -176,7 +187,11 @@ public class MC {
                     break;
                 }
             }
-            if(flagSfc == 0) continue;//失败就跳过这次映射
+            if(flagSfc == 0) {
+                System.out.println("它的点映射失败了！ ");
+                continue;//失败就跳过这次映射
+            }
+            System.out.println("它的点映射成功了！ 开始进行边映射");
             //映射边
             int LFindFlag;
             for(Link sfcLink:tmp_sfc.linkset){
@@ -187,25 +202,29 @@ public class MC {
                             LFindFlag = 1;
                             if(tmpVNFsrc.embedID == tmpVNFdst.embedID && tmpVNFdst.embedID != Max){
                                 sfcLink.setstate(1);//表示映射成功
-                            }else{
+                                System.out.println("VNFsrc: "+ tmpVNFsrc.getID() + " VNFdst" + tmpVNFdst.getID() +"映射到了同一个点");
+                            }//else{
+                            if(tmpVNFsrc.embedID != tmpVNFdst.embedID && tmpVNFdst.embedID != Max && tmpVNFsrc.embedID != Max){
+                                System.out.println("VNFsrc: "+ tmpVNFsrc.getID() + " VNFdst" + tmpVNFdst.getID() +"没有映射到了同一个点");
                                 for(Link gRlink:graph.rlinkset){//找出带宽合适的边
                                     if((gRlink.getBandwidth() - gRlink.cost) >= sfcLink.getBandwidth()){
                                         tmpESets.add(gRlink);
                                     }
                                 }
-                                //找路dijkstra(int src_embedID, int dst_embedID, Collection<Link> in_linkstes, int node_num)
+                                //找路dijkstra
                                 DijESets = dijkstra(tmpVNFsrc.embedID,tmpVNFdst.embedID,tmpESets,6);
                                 for(Link dlink:DijESets){
                                     if(dlink.getid() == Max){
+                                        System.out.println("两个点找路失败了！");
                                         flagSfc = 0;//映射失败
                                     }
                                 }
                                 if(flagSfc != 0){//找路成功，更新资源
                                     sfcLink.setstate(1);
-                                    ///
-                                    System.out.println("SFC的ID: " + tmp_sfc.ID + "他的ID是 "+sfcLink.getid() + "的边映射");
-                                    System.out.println("用了这些边：");
-                                    ///
+                                    ///*
+                                   System.out.println("找路成功了");
+                                   System.out.println("这次边映射用了这些边：");
+                                    // */
                                     for(Link e1:DijESets){
                                         //
                                         System.out.println(e1.getid());
@@ -253,6 +272,10 @@ public class MC {
         int count=0;
         //MC启动,资源开闭（更新操作在这里进行）----》资源网络的更新Dcf
         for(Switch tmp_sw:G.switchset){//对所有点进行资源转换操作
+            System.out.println();
+            System.out.println();
+            System.out.println("=====^^^^^^^^^^^=====");
+            System.out.println("本次资源更新操作开始");
             Random r = new Random();
             int r_id = r.nextInt(3);
             for(VNF tmp_v:tmp_sw.VNFset){//节点VNF状态更新
@@ -265,6 +288,9 @@ public class MC {
                 }
             }
 
+            //找关联sfc集合；
+            ResSfcsets.clear();
+
             //Dcf确定后，部署sfc
             G_tmp = deploy_SFC(G,sfcsets);
 
@@ -273,7 +299,7 @@ public class MC {
                 G_return.G_copy(G_tmp);
             }
 
-            if(TimerValue(G_return) < TimerValue(G_tmp) ){//&& G_tmp.getMaxUtility() >= 0
+            if(TimerValue(G_return) < TimerValue(G_tmp) ){
                 G_return.G_copy(G_tmp);
             }
 

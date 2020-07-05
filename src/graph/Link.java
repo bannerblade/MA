@@ -6,7 +6,7 @@ public class Link implements Serializable{
 	private int src;
 	private int dst;
 	public int cost = 0;//带宽使用量
-	private int price = 10;//单位资源费用, 最开始的时候是price = 0;
+	private int price = 1;//单位资源费用, 最开始的时候是price = 10;
 	private int Bandwidth ;//elink 200，光一个波段2000，//设定 光链路带宽是电链路带宽的10倍
 	private int state = 0;//链路使用状态，on = 1；也表示SFC里link的映射状态，state = 1，表示被映射了
 	private int type;//链路类型，电链路0，光链路1，sfc有向边3。资源网络的边type=4.光通路type = 5x,r如50表示wave=0的光通路;

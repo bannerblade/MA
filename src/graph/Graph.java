@@ -202,14 +202,14 @@ public class Graph implements Serializable {
         while(i.hasNext()){
             tmp = (Switch) i.next();
             if(1 == tmp.getstate()){
-                result  -= tmp.PW; //减去switch启动损耗
+                //result  -= tmp.PW; //减去switch启动损耗
                 //计算VNF里的消耗
                 VNF tmp_vnf = new VNF();
                 Iterator j = tmp.VNFset.iterator();
                 while(j.hasNext()){
                     tmp_vnf = (VNF) j.next();
                     if(1 == tmp_vnf.getState()){
-                        result -= tmp_vnf.VPW;
+                        //result -= tmp_vnf.VPW;
                         result += tmp_vnf.cost*tmp_vnf.getprice();
                     }
                 }

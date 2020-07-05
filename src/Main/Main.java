@@ -42,10 +42,14 @@ public class Main {
                     System.out.println("    成功部署的sfc数量：" + myMC.G.sfc_num);
                     myMC.G.sfc_num = 0;
                     myMC.G.em_flag = 0;///新加进去的
-                    //
+                    ///*
                     PrintGstate(myMC.G);
                     PrintAllSfc(sfcset);
-                    //
+                    System.out.println();
+                    System.out.println("---------------------------------------------------------------------");
+                    System.out.println("----------------------------下次映射开始-----------------------------");
+                    System.out.println("---------------------------------------------------------------------");
+                    // */
                     for(Sfc tm_sfc:myMC.sfcsets){tm_sfc.initial_sfc();}//把sfc集合里面的元素状态初始化。
                     myMC.G.recoverResourceCapacity();//G资源容量初始化
                     myMC.MCstart();
@@ -92,7 +96,9 @@ public class Main {
             System.out.println("\n");
             System.out.println("rlink信息");
             for(Link rl:G.rlinkset){
-                System.out.println("rlink的ID: " + rl.getid() +"容量：" + rl.getBandwidth()+"使用了的cost: " + rl.cost +"-->  src：" + rl.getsrcid() + "  dst: "+ rl.getdstid());
+                if(rl.cost > 0){
+                    System.out.println("rlink的ID: " + rl.getid() +"容量：" + rl.getBandwidth()+"使用了的cost: " + rl.cost +"-->  src：" + rl.getsrcid() + "  dst: "+ rl.getdstid());
+                }
             }
         }else {
             System.out.println("空的！");

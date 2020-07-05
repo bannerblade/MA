@@ -23,21 +23,25 @@ public class Sfc implements Serializable {
 		Random r = new Random();
 		int VNFnum = r.nextInt(4) + 2;//产生2-5个VNF
 		Random r2 = new Random();//产生第一个VNF的type的随机数
+		int tmp_src = Max;
+		int tmp_now = Max;
 
-		//VNFset.add(new VNF(0, r2.nextInt(5),r.nextInt(5) + 2));
-		VNFset.add(new VNF(0, 0,r.nextInt(5) + 2));
-		for(int i = 1; i< VNFnum; i++){
-			Random r3 = new Random();//随机生成VNF的type
-			VNFset.add(new VNF(i, i,r3.nextInt(5) + 2));
+		//添加VNF,且要防止链的两头VNF一样
+		for(int j=0;j<VNFnum;j++){
+			tmp_now = r.nextInt(5);
+			while(tmp_now == tmp_src){
+				tmp_now = r.nextInt(5);
+			}
+			VNFset.add(new VNF(j,tmp_now,r.nextInt(5) + 2));
+			tmp_src = tmp_now;
 		}
 		//添加SFC的有向边,通过VNF ID关联
 		for(int j = 0; j<(VNFnum -1); j++){
-			Random r4 = new Random();//随机生成边的带宽
-			linkset.add(new Link(j,j,j+1,r4.nextInt(6)+5,3));
+			linkset.add(new Link(j,j,j+1,r.nextInt(6)+5,3));
 		}
 	}
 
-	public int getid(){
+	public int getID(){
 		return this.ID;
 	}
 	public int getState(){return this.state;}
@@ -63,5 +67,19 @@ public class Sfc implements Serializable {
 		ObjectInputStream oi = new ObjectInputStream(bi);
 
 		return (oi.readObject());
+	}
+
+	@Override
+	public int hashCode() {
+		return ID;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if(this == obj) return true;
+		if(obj == null) return false;
+		if(this.getClass() != obj.getClass()) return false;
+		Sfc sfc = (Sfc) obj;
+		return ID == sfc.getID();
 	}
 }
