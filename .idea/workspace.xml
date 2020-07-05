@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6aab4f46-4037-4072-bb41-d1096d3f3aa5" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MC/Main/MC.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/Main/MC.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MC/Main/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/Main/Main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MC/SFC/Sfc.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/SFC/Sfc.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MC/graph/Graph.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/graph/Graph.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MC/graph/Link.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/graph/Link.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/MC/graph/Switch.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/graph/Switch.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main/MC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/MC.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/SFC/Sfc.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SFC/Sfc.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graph/Graph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/graph/Graph.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graph/Link.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/graph/Link.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/graph/Switch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/graph/Switch.java" afterDir="false" />
-    </list>
+    <list default="true" id="6aab4f46-4037-4072-bb41-d1096d3f3aa5" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -159,7 +144,7 @@
       <workItem from="1590657465604" duration="3012000" />
       <workItem from="1590671800983" duration="7000" />
       <workItem from="1593939241550" duration="3391000" />
-      <workItem from="1593958051626" duration="574000" />
+      <workItem from="1593958051626" duration="822000" />
     </task>
     <task id="LOCAL-00001" summary="第一次">
       <created>1590336731099</created>
@@ -175,7 +160,21 @@
       <option name="project" value="LOCAL" />
       <updated>1590595173669</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="第3次">
+      <created>1593958741492</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1593958741492</updated>
+    </task>
+    <task id="LOCAL-00004" summary="第3次">
+      <created>1593958837232</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1593958837232</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -200,17 +199,22 @@
     </ignored-roots>
     <MESSAGE value="第一次" />
     <MESSAGE value="第2次" />
-    <option name="LAST_COMMIT_MESSAGE" value="第2次" />
+    <MESSAGE value="第3次" />
+    <option name="LAST_COMMIT_MESSAGE" value="第3次" />
   </component>
   <component name="WindowStateProjectService">
+    <state x="556" y="167" key="#Deployment" timestamp="1593958887904">
+      <screen x="0" y="0" width="1739" height="978" />
+    </state>
+    <state x="556" y="167" key="#Deployment/0.0.1739.978@0.0.1739.978" timestamp="1593958887904" />
     <state x="1108" y="150" key="#com.intellij.ide.util.MemberChooser" timestamp="1585492644367">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
     <state x="1108" y="150" key="#com.intellij.ide.util.MemberChooser/0.0.1739.978@0.0.1739.978" timestamp="1585492644367" />
-    <state x="538" y="102" key="CommitChangelistDialog2" timestamp="1593958740380">
+    <state x="538" y="102" width="850" height="811" key="CommitChangelistDialog2" timestamp="1593958894028">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="538" y="102" key="CommitChangelistDialog2/0.0.1739.978@0.0.1739.978" timestamp="1593958740380" />
+    <state x="538" y="102" width="850" height="811" key="CommitChangelistDialog2/0.0.1739.978@0.0.1739.978" timestamp="1593958894028" />
     <state x="1040" y="290" key="FileChooserDialogImpl" timestamp="1590336581258">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
