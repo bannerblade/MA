@@ -19,13 +19,14 @@ public class Main {
             PrintStream ps = new PrintStream("C:\\Users\\91191\\Desktop\\G_print.txt");
             System.setOut(ps);
 
+            NumsGet getnum = new NumsGet();
             Graph G1 = new Graph(1);//创建标准图，G1是底层图
 
             G1.CreateRGraph();//初始化资源网络边。
 
 
             Collection<Sfc> sfcset = new HashSet<>();
-            sfcset = CreateSFC(3);//需求是300条SFC
+            sfcset = CreateSFC(90);//需求是300条SFC
 
             MC myMC = new MC(G1, sfcset);//这里输入G和sfcset，然后运行MC
             myMC.MC_ini();//G初始化
@@ -34,38 +35,34 @@ public class Main {
             System.out.println();
             int count = 0;
 
-            while(count < 5){
+            while(count < 100){
                 //************测试************
                 Iterator i = myMC.G.switchset.iterator();
                 if(i.hasNext()){
                     System.out.print("总收益："+myMC.G.getMaxUtility());
-                    System.out.println("    成功部署的sfc数量：" + myMC.G.sfc_num);
-                    myMC.G.sfc_num = 0;
+                    System.out.println("    成功部署的sfc数量：" +getnum.getEmbedSfcNums(myMC.sfcsets));
                     myMC.G.em_flag = 0;///新加进去的
-                    ///*
+/*
                     PrintGstate(myMC.G);
                     PrintAllSfc(sfcset);
                     System.out.println();
                     System.out.println("---------------------------------------------------------------------");
                     System.out.println("----------------------------下次映射开始-----------------------------");
                     System.out.println("---------------------------------------------------------------------");
-                    // */
-                    for(Sfc tm_sfc:myMC.sfcsets){tm_sfc.initial_sfc();}//把sfc集合里面的元素状态初始化。
-                    myMC.G.recoverResourceCapacity();//G资源容量初始化
+                    */
+                    //for(Sfc tm_sfc:myMC.sfcsets){tm_sfc.initial_sfc();}//把sfc集合里面的元素状态初始化。
+                    //myMC.G.recoverResourceCapacity();//G资源容量初始化
                     myMC.MCstart();
                 }else{
                     System.out.println("第 " + count + "次的G是空的！");
                 }
                 count++;
             }
-        }catch (FileNotFoundException e){
+        }/*catch (FileNotFoundException e){
             e.printStackTrace();
-        } catch (Exception E){
+        }*/ catch (Exception E){
             E.printStackTrace();
         }
-
-
-
     }
 
 

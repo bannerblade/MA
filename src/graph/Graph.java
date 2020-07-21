@@ -19,7 +19,6 @@ public class Graph implements Serializable {
     public Collection<Link> rlinkset = new HashSet<>();//这给容器存资源网络的边
     private Collection rlinknum = new HashSet();//这个来存删掉的link-ID号
     public int em_flag = 0;//这个映射函数用来标记是否映射成功。
-    public int sfc_num = 0;//存映射成功多少sfc
 
     public Graph(int Gtype){
         if(Gtype == 0){//只有电链路的图
@@ -242,7 +241,7 @@ public class Graph implements Serializable {
         }
     }
 
-    public void G_copy(Graph Ga){
+    public void cloneG(Graph Ga){//G_copy
         this.switchnum = Ga.switchnum;
         this.linknum = Ga.linknum;
 
@@ -285,7 +284,6 @@ public class Graph implements Serializable {
         this.rlinknum.addAll(Ga.rlinknum);
 
         em_flag = Ga.em_flag;
-        sfc_num = Ga.sfc_num;
 
     }
 

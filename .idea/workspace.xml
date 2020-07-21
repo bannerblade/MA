@@ -1,7 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6aab4f46-4037-4072-bb41-d1096d3f3aa5" name="Default Changelist" comment="" />
+    <list default="true" id="6aab4f46-4037-4072-bb41-d1096d3f3aa5" name="Default Changelist" comment="第3次">
+      <change afterPath="$PROJECT_DIR$/src/Main/NumsGet.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/MC/Main/MC.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/Main/MC.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/MC/Main/Main.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/Main/Main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/MC/SFC/Sfc.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/SFC/Sfc.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/MC/graph/Graph.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/graph/Graph.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/MC/graph/Link.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/graph/Link.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/production/MC/graph/VNF.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/MC/graph/VNF.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main/MC.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/MC.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/SFC/Sfc.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/SFC/Sfc.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graph/Graph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/graph/Graph.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graph/Link.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/graph/Link.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graph/VNF.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/graph/VNF.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,6 +47,7 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -46,7 +62,7 @@
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
@@ -144,7 +160,17 @@
       <workItem from="1590657465604" duration="3012000" />
       <workItem from="1590671800983" duration="7000" />
       <workItem from="1593939241550" duration="3391000" />
-      <workItem from="1593958051626" duration="822000" />
+      <workItem from="1593958051626" duration="5401000" />
+      <workItem from="1594207366422" duration="5362000" />
+      <workItem from="1594257673485" duration="2891000" />
+      <workItem from="1594622921030" duration="9541000" />
+      <workItem from="1594643871157" duration="18000" />
+      <workItem from="1594736087819" duration="1046000" />
+      <workItem from="1594739695555" duration="4000" />
+      <workItem from="1594784381663" duration="14000" />
+      <workItem from="1594794602735" duration="2246000" />
+      <workItem from="1595248456728" duration="370000" />
+      <workItem from="1595314888939" duration="3228000" />
     </task>
     <task id="LOCAL-00001" summary="第一次">
       <created>1590336731099</created>
@@ -174,7 +200,14 @@
       <option name="project" value="LOCAL" />
       <updated>1593958837232</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="第3次">
+      <created>1593959083396</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1593959083396</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -183,6 +216,31 @@
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
+        <entry key="1">
+          <value>
+            <State>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
         <entry key="MAIN">
           <value>
             <State>
@@ -207,14 +265,14 @@
       <screen x="0" y="0" width="1739" height="978" />
     </state>
     <state x="556" y="167" key="#Deployment/0.0.1739.978@0.0.1739.978" timestamp="1593958887904" />
-    <state x="1108" y="150" key="#com.intellij.ide.util.MemberChooser" timestamp="1585492644367">
+    <state x="462" y="149" key="#Notifications" timestamp="1593959195205">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="1108" y="150" key="#com.intellij.ide.util.MemberChooser/0.0.1739.978@0.0.1739.978" timestamp="1585492644367" />
-    <state x="538" y="102" width="850" height="811" key="CommitChangelistDialog2" timestamp="1593958894028">
+    <state x="462" y="149" key="#Notifications/0.0.1739.978@0.0.1739.978" timestamp="1593959195205" />
+    <state x="538" y="102" width="850" height="811" key="CommitChangelistDialog2" timestamp="1593959364103">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="538" y="102" width="850" height="811" key="CommitChangelistDialog2/0.0.1739.978@0.0.1739.978" timestamp="1593958894028" />
+    <state x="538" y="102" width="850" height="811" key="CommitChangelistDialog2/0.0.1739.978@0.0.1739.978" timestamp="1593959364103" />
     <state x="1040" y="290" key="FileChooserDialogImpl" timestamp="1590336581258">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
@@ -227,26 +285,26 @@
       <screen x="0" y="0" width="1739" height="978" />
     </state>
     <state x="1111" y="252" key="Github.UntrackedFilesDialog/0.0.1739.978@0.0.1739.978" timestamp="1590335146028" />
-    <state width="1478" height="115" key="GridCell.Tab.0.bottom" timestamp="1590667855206">
+    <state width="1362" height="115" key="GridCell.Tab.0.bottom" timestamp="1594636144523">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state width="1478" height="138" key="GridCell.Tab.0.bottom/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1590373505352" />
-    <state width="1478" height="115" key="GridCell.Tab.0.bottom/0.0.1739.978@0.0.1739.978" timestamp="1590667855206" />
-    <state width="1478" height="115" key="GridCell.Tab.0.center" timestamp="1590667855206">
+    <state width="1362" height="115" key="GridCell.Tab.0.bottom/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1594636144523" />
+    <state width="1361" height="115" key="GridCell.Tab.0.bottom/0.0.1739.978@0.0.1739.978" timestamp="1594304463212" />
+    <state width="1362" height="115" key="GridCell.Tab.0.center" timestamp="1594636144523">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state width="1478" height="138" key="GridCell.Tab.0.center/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1590373505352" />
-    <state width="1478" height="115" key="GridCell.Tab.0.center/0.0.1739.978@0.0.1739.978" timestamp="1590667855206" />
-    <state width="1478" height="115" key="GridCell.Tab.0.left" timestamp="1590667855206">
+    <state width="1362" height="115" key="GridCell.Tab.0.center/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1594636144523" />
+    <state width="1361" height="115" key="GridCell.Tab.0.center/0.0.1739.978@0.0.1739.978" timestamp="1594304463212" />
+    <state width="1362" height="115" key="GridCell.Tab.0.left" timestamp="1594636144523">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state width="1478" height="138" key="GridCell.Tab.0.left/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1590373505352" />
-    <state width="1478" height="115" key="GridCell.Tab.0.left/0.0.1739.978@0.0.1739.978" timestamp="1590667855206" />
-    <state width="1478" height="115" key="GridCell.Tab.0.right" timestamp="1590667855206">
+    <state width="1362" height="115" key="GridCell.Tab.0.left/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1594636144523" />
+    <state width="1361" height="115" key="GridCell.Tab.0.left/0.0.1739.978@0.0.1739.978" timestamp="1594304463212" />
+    <state width="1362" height="115" key="GridCell.Tab.0.right" timestamp="1594636144523">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state width="1478" height="138" key="GridCell.Tab.0.right/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1590373505352" />
-    <state width="1478" height="115" key="GridCell.Tab.0.right/0.0.1739.978@0.0.1739.978" timestamp="1590667855206" />
+    <state width="1362" height="115" key="GridCell.Tab.0.right/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1594636144523" />
+    <state width="1361" height="115" key="GridCell.Tab.0.right/0.0.1739.978@0.0.1739.978" timestamp="1594304463212" />
     <state width="1478" height="115" key="GridCell.Tab.1.bottom" timestamp="1590667855206">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
@@ -271,23 +329,24 @@
       <screen x="0" y="0" width="1739" height="978" />
     </state>
     <state x="767" y="231" key="RollbackChangesDialog/0.0.1739.978@0.0.1739.978" timestamp="1590335443551" />
-    <state x="522" y="168" width="996" height="715" key="SettingsEditor" timestamp="1593958091699">
+    <state x="349" y="166" width="996" height="715" key="SettingsEditor" timestamp="1594210884133">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="522" y="168" width="996" height="715" key="SettingsEditor/0.0.1739.978@0.0.1739.978" timestamp="1593958091699" />
-    <state x="505" y="283" key="Vcs.Push.Dialog.v2" timestamp="1590595237226">
+    <state x="349" y="166" width="996" height="715" key="SettingsEditor/0.0.1739.978@0.0.1739.978" timestamp="1594210884133" />
+    <state x="505" y="283" key="Vcs.Push.Dialog.v2" timestamp="1593959516454">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="505" y="283" key="Vcs.Push.Dialog.v2/0.0.1739.978@0.0.1739.978" timestamp="1590595237225" />
-    <state x="568" y="333" key="com.intellij.ide.util.TipDialog" timestamp="1590671801092">
+    <state x="505" y="283" key="Vcs.Push.Dialog.v2/0.0.1739.978@0.0.1739.978" timestamp="1593959516454" />
+    <state x="568" y="333" key="com.intellij.ide.util.TipDialog" timestamp="1595314889823">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="568" y="333" key="com.intellij.ide.util.TipDialog/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1590370960017" />
-    <state x="568" y="333" key="com.intellij.ide.util.TipDialog/0.0.1739.978@0.0.1739.978" timestamp="1590671801092" />
-    <state x="672" y="429" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1593958764680">
+    <state x="-1352" y="333" key="com.intellij.ide.util.TipDialog/-1920.0.1739.978/0.0.1739.978@-1920.0.1739.978" timestamp="1594643872635" />
+    <state x="568" y="333" key="com.intellij.ide.util.TipDialog/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1595314889823" />
+    <state x="568" y="333" key="com.intellij.ide.util.TipDialog/0.0.1739.978@0.0.1739.978" timestamp="1594784382338" />
+    <state x="672" y="429" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1593959179780">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="672" y="429" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1739.978@0.0.1739.978" timestamp="1593958764680" />
+    <state x="672" y="429" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1739.978@0.0.1739.978" timestamp="1593959179780" />
     <state x="558" y="222" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1588182058936">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
@@ -296,39 +355,25 @@
       <screen x="0" y="0" width="1739" height="978" />
     </state>
     <state x="495" y="294" key="git4idea.merge.GitPullDialog/0.0.1739.978@0.0.1739.978" timestamp="1593958319994" />
-    <state x="528" y="226" key="run.anything.popup" timestamp="1590593788870">
+    <state x="670" y="355" key="git4idea.rebase.GitRebaseDialog" timestamp="1593959415789">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="528" y="226" key="run.anything.popup/0.0.1739.978@0.0.1739.978" timestamp="1590593788870" />
-    <state x="532" y="210" width="672" height="678" key="search.everywhere.popup" timestamp="1586879706073">
+    <state x="670" y="355" key="git4idea.rebase.GitRebaseDialog/0.0.1739.978@0.0.1739.978" timestamp="1593959415789" />
+    <state x="528" y="226" key="run.anything.popup" timestamp="1594210726317">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
-    <state x="532" y="210" width="672" height="678" key="search.everywhere.popup/0.0.1739.978@0.0.1739.978" timestamp="1586879706073" />
+    <state x="528" y="226" key="run.anything.popup/0.0.1739.978@0.0.1739.978" timestamp="1594210726317" />
+    <state x="533" y="210" width="672" height="678" key="search.everywhere.popup" timestamp="1594626271740">
+      <screen x="0" y="0" width="1739" height="978" />
+    </state>
+    <state x="533" y="210" width="672" height="678" key="search.everywhere.popup/-1920.0.1739.978/0.0.1739.978@0.0.1739.978" timestamp="1594626271740" />
+    <state x="533" y="210" width="672" height="678" key="search.everywhere.popup/0.0.1739.978@0.0.1739.978" timestamp="1594207809228" />
     <state x="736" y="213" key="svn.repositoryBrowser" timestamp="1590335092373">
       <screen x="0" y="0" width="1739" height="978" />
     </state>
     <state x="736" y="213" key="svn.repositoryBrowser/0.0.1739.978@0.0.1739.978" timestamp="1590335092373" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/Main/Main.java</url>
-          <line>48</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/Main/MC.java</url>
-          <line>294</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/Main/MC.java</url>
-          <line>168</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <watches-manager>
       <configuration name="Application">
         <watch expression="((HashSet)linksets).toArray()[1]" custom="java.util.HashSet" />

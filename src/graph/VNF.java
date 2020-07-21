@@ -16,6 +16,8 @@ public class VNF implements Serializable {
     private int price;//单位资源收益1000~1400
     private int state;//VNF的状态，这个是图用的，SFC不用。
     public int embedID = Max;//存映射到的那个点的ID
+    public int embedVnfID = Max;//存映射到的那个点的vnf-ID
+
     public int VPW = 200;//VNF空载损耗
 
     public VNF(int VNFtype, int VNFcapacity){

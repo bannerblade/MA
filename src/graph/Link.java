@@ -1,5 +1,7 @@
 package graph;
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Link implements Serializable{
 	private int ID;
@@ -12,6 +14,8 @@ public class Link implements Serializable{
 	private int type;//链路类型，电链路0，光链路1，sfc有向边3。资源网络的边type=4.光通路type = 5x,r如50表示wave=0的光通路;
 	private int wave;//光链路波段,假设有3个波段
 	private int O_total_price = 0;//光通路的就总价格,500
+
+	public Set<Link> usedLinkSet = new HashSet<>();//新加，存这条sfc使用过的边。
 
 	public Link (int id,int src , int dst, int Bandwidth,int type){
 		this.ID = id;
