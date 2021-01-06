@@ -1,6 +1,7 @@
 package graph;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +20,8 @@ public class Graph implements Serializable {
     public Collection<Link> rlinkset = new HashSet<>();//这给容器存资源网络的边
     private Collection rlinknum = new HashSet();//这个来存删掉的link-ID号
     public int em_flag = 0;//这个映射函数用来标记是否映射成功。
+    public double existence=0;//存在时间
+    public double qcf=0;//转移概率
 
     public Graph(int Gtype){
         if(Gtype == 0){//只有电链路的图
@@ -162,6 +165,64 @@ public class Graph implements Serializable {
         }
     }
 
+    public Graph(String fileRPath, String fileWPath) throws IOException {
+        File fl = new File(fileRPath);
+        FileInputStream fls = new FileInputStream(fl);
+        InputStreamReader isr = new InputStreamReader(fls);
+        BufferedReader br = new BufferedReader(isr);
+
+        File  fwl = new File(fileWPath);
+        FileOutputStream fos = new FileOutputStream(fwl);
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        BufferedWriter bw = new BufferedWriter(osw);
+
+        int m,n;
+        n = Integer.parseInt(br.readLine().trim());//节点数目
+        m = Integer.parseInt(br.readLine().trim());//电链路数目
+        switchnum = n;
+        linknum = m;
+        bw.write(n);
+        bw.newLine();
+        bw.write(m);
+        bw.newLine();
+        //int oLinkNums=
+        //初始化6个switch
+        for(int i=0;i<switchnum;i++){
+            switchset.add(new Switch(i));
+        }
+        for(int i=0;i<linknum;i++){//电链路层
+            String[] tps = br.readLine().split(",");
+            //边添加进去,初始化16条有向边，电链路层
+            elinkset.add(new Elink(Integer.parseInt(tps[0].trim()),Integer.parseInt(tps[1].trim()) ,Integer.parseInt(tps[2].trim()) ,
+                    Integer.parseInt(tps[3].trim()),Integer.parseInt(tps[4].trim())));
+            bw.write(Arrays.toString(tps));
+            bw.newLine();
+        }
+        for(int i=0;i<linknum;i++){//O1光链路层
+            String[] tps = br.readLine().split(",");
+            olinkset.add(new Olink(Integer.parseInt(tps[0].trim()),Integer.parseInt(tps[1].trim()) ,Integer.parseInt(tps[2].trim()) ,
+                    Integer.parseInt(tps[3].trim()),Integer.parseInt(tps[4].trim()),Integer.parseInt(tps[5].trim())));
+            bw.write(Arrays.toString(tps));
+            bw.newLine();
+        }
+        for(int i=0;i<linknum;i++){//O2光链路层
+            String[] tps = br.readLine().split(",");
+            olinkset.add(new Olink(Integer.parseInt(tps[0].trim()),Integer.parseInt(tps[1].trim()) ,Integer.parseInt(tps[2].trim()) ,
+                    Integer.parseInt(tps[3].trim()),Integer.parseInt(tps[4].trim()),Integer.parseInt(tps[5].trim())));
+            bw.write(Arrays.toString(tps));
+            bw.newLine();
+        }
+        for(int i=0;i<linknum;i++){//O3光链路层
+            String[] tps = br.readLine().split(",");
+            olinkset.add(new Olink(Integer.parseInt(tps[0].trim()),Integer.parseInt(tps[1].trim()) ,Integer.parseInt(tps[2].trim()) ,
+                    Integer.parseInt(tps[3].trim()),Integer.parseInt(tps[4].trim()),Integer.parseInt(tps[5].trim())));
+            bw.write(Arrays.toString(tps));
+            bw.newLine();
+        }
+        br.close();
+        bw.close();
+    }
+
     public Graph(){}
 
     public int getSwitchnum(){return this.switchnum;}
@@ -230,6 +291,12 @@ public class Graph implements Serializable {
         return result;
     }
 
+    public double getExistence(){
+        this.existence = this.qcf*this.getMaxUtility();
+        if(this.existence < 0) this.existence = 0.000000001;
+        return this.existence;
+    }
+
     public void CreateRGraph(){//初始化，生成资源网络,只需要生成资源网络的边（rlink）
         //VNF资源不变，把边加入资源网络的边
         Iterator i = elinkset.iterator();
@@ -241,9 +308,49 @@ public class Graph implements Serializable {
         }
     }
 
+    public String GetInfo(){
+        StringBuilder res = new StringBuilder();
+
+        Iterator i = this.switchset.iterator();
+        if(i.hasNext()){
+            for(Switch tmp_s:this.switchset){
+                res.append("\n");
+                res.append("SW的ID: ").append(tmp_s.getID()).append("---->>>>");
+                res.append("SW状态").append(tmp_s.getstate());
+                res.append("\n");
+                for(VNF tmpv:tmp_s.VNFset){
+                    res.append("  VNF的ID：").append(tmpv.getID()).append("------>>>>>>");
+                    res.append("  VNF状态").append(tmpv.getState());
+                    res.append("  VNF类型").append(tmpv.getVNFtype());
+                    res.append("  VNF容量").append(tmpv.VNFcapacity).append("******");
+                    res.append("  VNF的cost").append(tmpv.cost);
+                    res.append("\n");
+                }
+            }
+            res.append("\n");
+            res.append("rlink信息");
+            res.append("\n");
+            for(Link rl:this.rlinkset){
+                res.append("rlink的ID: ").append(rl.getid()).append("容量：").append(rl.getBandwidth()).append("使用了的cost: ").append(rl.cost).append("-->  src：").append(rl.getsrcid()).append("  dst: ").append(rl.getdstid());
+/*                if(rl.cost > 0){
+                    res.append("rlink的ID: ").append(rl.getid()).append("容量：").append(rl.getBandwidth()).append("使用了的cost: ").append(rl.cost).append("-->  src：").append(rl.getsrcid()).append("  dst: ").append(rl.getdstid());
+                }else{
+                    res.append("没有");
+                }*/
+                res.append("\n");
+            }
+        }else {
+            res.append("空的！");
+            res.append("\n");
+        }
+        return res.toString();
+    }
+
     public void cloneG(Graph Ga){//G_copy
         this.switchnum = Ga.switchnum;
         this.linknum = Ga.linknum;
+        this.existence = Ga.existence;
+        this.qcf = Ga.qcf;
 
         switchset.clear();
         for(Switch tmp_sw: Ga.switchset){
@@ -298,5 +405,6 @@ public class Graph implements Serializable {
 
         return (oi.readObject());
     }
+
 
 }

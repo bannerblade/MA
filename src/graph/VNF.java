@@ -81,6 +81,14 @@ public class VNF implements Serializable {
         this.VNFcapacity = VNFcapacity;
     }
 
+    public void reverseState(){
+        if(this.getState() == 1){//节点VNF状态更新
+            this.setState(0);
+        }else{
+            this.setState(1);
+        }
+    }
+
     @Override
     public int hashCode() {
         return ID;

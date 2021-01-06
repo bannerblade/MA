@@ -15,58 +15,88 @@ import graph.VNF;
 
 public class Main {
     public static void main(String[] args) {
-        try{
-            PrintStream ps = new PrintStream("C:\\Users\\91191\\Desktop\\G_print.txt");
-            System.setOut(ps);
+        int simulateTimes = 1;//选择仿真次数。
+        for(int j=0;j<simulateTimes;j++){
+            try{
+                PrintStream ps = new PrintStream("C:\\Users\\91191\\Desktop\\G_print" + j + ".txt");
+                System.setOut(ps);
 
-            NumsGet getnum = new NumsGet();
-            Graph G1 = new Graph(1);//创建标准图，G1是底层图
+                //打印资源的信息，图G的。网络信息
+                File GInfoFile = new File("C:\\Users\\91191\\Desktop\\MC1.2\\txt\\GInfo.txt");
+                FileOutputStream fos = new FileOutputStream(GInfoFile);
+                OutputStreamWriter osw = new OutputStreamWriter(fos);
 
-            G1.CreateRGraph();//初始化资源网络边。
+                NumsGet getnum = new NumsGet();
+                Graph G1 = new Graph(1);//创建标准图，G1是底层图
+
+                G1.CreateRGraph();//初始化资源网络边。
+
+                String fileSfcPath = "C:\\Users\\91191\\Desktop\\MC1.2\\txt\\sfcs.txt";
+                String fileSfcPath2 = "C:\\Users\\91191\\Desktop\\MC1.2\\txt\\MINIsfcs.txt";
+                String fileSfcPath3 = "C:\\Users\\91191\\Desktop\\MC1.2\\txt\\sfcEmbeddingInfo.txt";
 
 
-            Collection<Sfc> sfcset = new HashSet<>();
-            sfcset = CreateSFC(90);//需求是300条SFC
+                //Collection<Sfc> sfcset = FileCreateSfc(fileSfcPath);
+                Collection<Sfc> MiniSfcSet = FileCreateSfc(fileSfcPath2);
+                //Collection<Sfc> MiniSfcSet = CreateSFC(5);
+                //Collection<Sfc> sfcset = CreateSFC(60);//需求是300条SFC
+                //getSfcs(fileSfcPath2,MiniSfcSet);  //把产生的sfc打印到txt
 
-            MC myMC = new MC(G1, sfcset);//这里输入G和sfcset，然后运行MC
-            myMC.MC_ini();//G初始化
-            myMC.MCstart();
+                MC myMC = new MC(G1, MiniSfcSet);//这里输入G和sfcset，然后运行MC
+                myMC.osw = osw;
 
-            System.out.println();
-            int count = 0;
+                myMC.osw.write("**********************************");
+                myMC.osw.write("\r\n");
+                myMC.osw.write("************第  " + 0 + "  次************");
+                myMC.osw.write("\r\n");
+                myMC.osw.write("**********************************");
+                myMC.osw.write("\r\n");
 
-            while(count < 100){
-                //************测试************
-                Iterator i = myMC.G.switchset.iterator();
-                if(i.hasNext()){
-                    System.out.print("总收益："+myMC.G.getMaxUtility());
-                    System.out.println("    成功部署的sfc数量：" +getnum.getEmbedSfcNums(myMC.sfcsets));
-                    myMC.G.em_flag = 0;///新加进去的
-/*
-                    PrintGstate(myMC.G);
-                    PrintAllSfc(sfcset);
-                    System.out.println();
-                    System.out.println("---------------------------------------------------------------------");
-                    System.out.println("----------------------------下次映射开始-----------------------------");
-                    System.out.println("---------------------------------------------------------------------");
-                    */
-                    //for(Sfc tm_sfc:myMC.sfcsets){tm_sfc.initial_sfc();}//把sfc集合里面的元素状态初始化。
-                    //myMC.G.recoverResourceCapacity();//G资源容量初始化
-                    myMC.MCstart();
-                }else{
-                    System.out.println("第 " + count + "次的G是空的！");
+                myMC.MC_ini();//G初始化
+                myMC.MCstart();
+
+                System.out.println();
+                int count = 1;
+
+
+                while(count < 150){
+                    //************测试************
+                    myMC.osw.write("\r\n");
+                    myMC.osw.write("**********************************");
+                    myMC.osw.write("\r\n");
+                    myMC.osw.write("************第  " + count + "  次************");
+                    myMC.osw.write("\r\n");
+                    myMC.osw.write("**********************************");
+                    myMC.osw.write("\r\n");
+                    Iterator i = myMC.G.switchset.iterator();
+                    if(i.hasNext()){
+                        System.out.print("总收益："+myMC.G.getMaxUtility());
+                        //System.out.print("    存在时间："+myMC.G.getExistence());
+                        System.out.print("    存在时间："+exiR(myMC.G.existence,myMC.G.getExistence())*getnum.getEmbedSfcNums(myMC.sfcsets)/myMC.sfcsets.size());
+                        System.out.print("    转移概率："+myMC.G.qcf);
+                        System.out.println("    成功部署的sfc数量：" +getnum.getEmbedSfcNums(myMC.sfcsets));
+                        myMC.G.em_flag = 0;///新加进去的
+                        myMC.MCstart();
+                    }else{
+                        System.out.println("第 " + count + "次的G是空的！");
+                    }
+                    count++;
                 }
-                count++;
+                getEmbeddingInfo(fileSfcPath3, myMC.sfcsets);
+                osw.close();
+            }   catch (Exception E){
+                E.printStackTrace();
             }
-        }/*catch (FileNotFoundException e){
-            e.printStackTrace();
-        }*/ catch (Exception E){
-            E.printStackTrace();
         }
     }
 
+    public static double exiR(double old,double now){
+        double re = now;
+        if(old > re) re *= 0.000001 ;
+        return re;
+    }
 
-   public static Collection<Sfc> CreateSFC(int num){//创建SFC群，装再SFCset里返回。
+    public static Collection<Sfc> CreateSFC(int num){//创建SFC群，装再SFCset里返回。
        Collection<Sfc> sfcset = new HashSet<>();
       for(int i=0;i<num;i++){
           sfcset.add(new Sfc(i));
@@ -74,6 +104,101 @@ public class Main {
        return sfcset;
    }
 
+    public static Collection<Sfc> FileCreateSfc(String file) throws IOException {
+        Collection<Sfc> sfcset = new HashSet<>();
+        File fl = new File(file);
+        FileInputStream fis = new FileInputStream(fl);
+        InputStreamReader isr = new InputStreamReader(fis);
+        BufferedReader br = new BufferedReader(isr);
+
+        int num = Integer.parseInt(br.readLine().trim());//节点数目
+        for(int i=0;i<num;i++){
+            int sfcId = Integer.parseInt(br.readLine().trim());//ID
+            String[] tps = br.readLine().split(",");
+            int vnum = Integer.parseInt(tps[0].trim());//vnf的数目
+            int lnum = Integer.parseInt(tps[1].trim());//link的数目
+
+            Collection<VNF> VNFset = new HashSet<>();//这个容器存VNF
+            Collection<Link> linkset = new HashSet<>();//这个容器存有向边
+            for(int j=0;j<vnum;j++){//vnf
+                String[] ts = br.readLine().split(",");
+                VNFset.add(new VNF(Integer.parseInt(ts[0].trim()),Integer.parseInt(ts[1].trim()),Integer.parseInt(ts[2].trim())));
+            }
+            for(int j=0;j<lnum;j++){//link
+                String[] ts = br.readLine().split(",");
+                linkset.add(new Link(Integer.parseInt(ts[0].trim()),Integer.parseInt(ts[1].trim()),
+                        Integer.parseInt(ts[2].trim()), Integer.parseInt(ts[3].trim()),3));
+            }
+            sfcset.add(new Sfc(sfcId,VNFset,linkset));
+        }
+        br.close();
+        return sfcset;
+    }
+
+    public static void getEmbeddingInfo(String file, Collection<Sfc> set) throws IOException {
+        FileOutputStream fos = new FileOutputStream(file);
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        BufferedWriter bw = new BufferedWriter(osw);
+        bw.newLine();
+        for(Sfc sfc:set){
+            if(sfc.getState() == 1){
+                bw.write("sfc的ID：" + sfc.ID);
+                bw.newLine();
+                for(VNF vnf:sfc.VNFset){
+                    bw.write("vnf的ID：" + vnf.getID() + "  映射到的点：" + vnf.embedID);
+                    bw.newLine();
+                }
+                for(Link link:sfc.linkset){
+                    bw.write("link的ID：" + link.getid() + "  , 用到的边：");
+                    bw.newLine();
+                    if(link.usedLinkSet.size() == 0) bw.write("没有用到rLink,可能映射到同一个点了。");
+                    for(Link l:link.usedLinkSet){
+                        bw.write("rLink的ID：" + l.getid());
+                        bw.newLine();
+                    }
+                    bw.newLine();
+                }
+            }
+        }
+        bw.close();
+    }
+
+    public static void getSfcs(String file, Collection<Sfc> set) throws IOException{
+        File fl = new File(file);//注意一下打印的sfc数目，以前是自己手动添加的。现在改自动了，小心点。
+        FileOutputStream fos = new FileOutputStream(fl);
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+
+        BufferedWriter bw = new BufferedWriter(osw);
+        bw.write(set.size());
+        bw.newLine();
+        for(Sfc sfc:set){
+            bw.write(Integer.toString(sfc.ID));
+            bw.newLine();
+            bw.write(Integer.toString(sfc.VNFset.size()));//vnf的数目
+            bw.write(",");
+            bw.write(Integer.toString(sfc.linkset.size()));//link的数目
+            bw.newLine();
+            for(VNF vnf:sfc.VNFset){
+                bw.write(Integer.toString(vnf.getID()));//vnf的ID
+                bw.write(",");
+                bw.write(Integer.toString(vnf.getVNFtype()));//vnf的type
+                bw.write(",");
+                bw.write(Integer.toString(vnf.VNFcapacity));//vnf的capacity
+                bw.newLine();
+            }
+            for(Link link:sfc.linkset){
+                bw.write(Integer.toString(link.getid()));
+                bw.write(",");
+                bw.write(Integer.toString(link.getsrcid()));
+                bw.write(",");
+                bw.write(Integer.toString(link.getdstid()));
+                bw.write(",");
+                bw.write(Integer.toString(link.getBandwidth()));
+                bw.newLine();
+            }
+        }
+        bw.close();
+    }
     public static void PrintGstate(Graph G){
         Iterator i = G.switchset.iterator();
         if(i.hasNext()){

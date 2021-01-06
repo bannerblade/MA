@@ -38,8 +38,15 @@ public class Switch implements Serializable {
 
         for(int i=0;i<3;i++){//随机设置3个VNF，type 随机，资源容量100-150；
             Random r = new Random();
-            VNFset.add(    new VNF(i, r.nextInt(5),  r.nextInt(50) + 100, r.nextInt(5)+5));
+            //VNFset.add(    new VNF(i, r.nextInt(5),  r.nextInt(50) + 100, r.nextInt(5)+5));
+            VNFset.add(    new VNF(i, i,   100, 5));
         }
+
+        //public VNF(ID,VNFtype, VNFcapacity, cost, price,state, embedID,  VPW)
+/*        for(int i=0;i<5;i++){//随机设置5个VNF，type 随机，资源容量100-150；
+            VNFset.add(    new VNF(i, i,  250, 5));
+            //VNFset.add(    new VNF(ID, ID,  350, 5));
+        }*/
     }
 
     public Switch (int ID,int state, int in_PW){

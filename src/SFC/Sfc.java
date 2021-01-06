@@ -39,6 +39,13 @@ public class Sfc implements Serializable {
 		}
 	}
 
+	//固定生成一条SFC
+	public Sfc(int id ,Collection<VNF> vSet, Collection<Link> lSet){
+		this.ID = id;
+		VNFset.addAll(vSet);
+		linkset.addAll(lSet);
+	}
+
 	public int getID(){
 		return this.ID;
 	}
