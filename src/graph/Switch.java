@@ -14,39 +14,24 @@ public class Switch implements Serializable {
     private int state;//交换机使用状态，on = 1,off =0;
     public int PW = 30;//交换机开启功耗，损耗100
     public Collection<VNF> VNFset = new HashSet<>();//这个容器存VNF，三个VNF，固定
-    //public Collection<VNF> embed_VNFsets = new HashSet<>();//这个容器存SFC的VNF，表示映射到这个点上
-
 
     public int getID(){
         return this.ID;
     }
-
     public void setID(int id){
         this.ID = id;
     }
 
-    public void setVNFs(){
-        for(int i=0;i<3;i++){
-            Random r = new Random();//VNF price 以前是 r.nextInt(5)+5)
-            VNFset.add(    new VNF(i, r.nextInt(5), r.nextInt(50) + 100, r.nextInt(5)*10+200));
-        }
-    }
 
     public Switch (int ID){
         this.ID = ID;
         this.state = 0;
 
-        for(int i=0;i<3;i++){//随机设置3个VNF，type 随机，资源容量100-150；
+        for(int i=0;i<8;i++){//随机设置3个VNF，type 随机，资源容量100-150；
             Random r = new Random();
-            //VNFset.add(    new VNF(i, r.nextInt(5),  r.nextInt(50) + 100, r.nextInt(5)+5));
-            VNFset.add(    new VNF(i, i,   100, 5));
+            //public VNF(ID,VNFtype, VNFcapacity, cost, price,state, embedID,  VPW)
+            VNFset.add(    new VNF(i, r.nextInt(5),   r.nextInt(20) + 100, r.nextInt(5)+8));
         }
-
-        //public VNF(ID,VNFtype, VNFcapacity, cost, price,state, embedID,  VPW)
-/*        for(int i=0;i<5;i++){//随机设置5个VNF，type 随机，资源容量100-150；
-            VNFset.add(    new VNF(i, i,  250, 5));
-            //VNFset.add(    new VNF(ID, ID,  350, 5));
-        }*/
     }
 
     public Switch (int ID,int state, int in_PW){
@@ -60,6 +45,13 @@ public class Switch implements Serializable {
     public int getstate(){return this.state;}
     public void setstate (int state){this.state = state;}
 
+    public int getCostSum(){
+        int res=0;
+        for(VNF nf:VNFset){
+            res += nf.cost;
+        }
+        return res;
+    }
 
     @Override
     public int hashCode() {

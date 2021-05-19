@@ -21,12 +21,19 @@ public class MC {
     public Graph G = new Graph();
     public OutputStreamWriter osw;
     public Collection<Sfc> sfcsets = new HashSet<>();
-    //public Set<Sfc> resSfcSets = new HashSet<>();////ResSfcsets装关联sfc
+
+    public int flagV2=-1;
+    public int flagV1=-1;
+    public int flagSW1=-1;
+    public int flagSW2=-1;
+    public int enFlag = 1;
+
+    public int flagOPath1=0;
+    public int flagOPath2=0;
 
     public MC(Graph Ga, Collection<Sfc> sfcset){
         G.cloneG(Ga);
         sfcsets.addAll(sfcset);
-        //resSfcSets.addAll(sfcset);
     }
 
     void MC_ini(){
@@ -34,22 +41,26 @@ public class MC {
         //节点初始化，开启了全部节点的VNF和电链路
         for(Switch tmp:G.switchset){
             tmp.setstate(1);
-            if(tmp.getID() == 0 || tmp.getID() == 2){
+            if(tmp.getID()%4 == 0 ){
                 for(VNF tmp_vnf:tmp.VNFset){
                     if(tmp_vnf.getID() == 1 || tmp_vnf.getID() == 2) tmp_vnf.setState(1);
                 }
-            }else{
+            }/*else{
                 for(VNF tmp_vnf:tmp.VNFset){
                     if(tmp_vnf.getID() == 1) tmp_vnf.setState(1);
                 }
-            }
+            }*/
         }
-        //边初始化
+        //边初始化1
         for(Elink tmpElink:G.elinkset){
             tmpElink.setstate(1);
             G.rlinkset.add(tmpElink);
         }
-
+        /*//边初始化2
+        for(Olink tmpElink:G.olinkset){
+            tmpElink.setstate(0);
+            G.rlinkset.add(tmpElink);
+        }*/
     }
 
     Collection<Link> dijkstra(int src_embedID, int dst_embedID, Collection<Link> in_linkstes, int node_num){
@@ -153,8 +164,31 @@ public class MC {
     Set<Sfc> copySfcSet(Collection<Sfc> sets) throws Exception {
         Set<Sfc> res = new HashSet<>();
         for(Sfc sfc:sets){
-            Sfc nf = (Sfc) sfc.deepClone();
-            res.add(nf);
+            Sfc sc = new Sfc();
+            sc.ID = sfc.ID;
+            sc.setState(sfc.getState());
+
+            for(VNF nf:sfc.VNFset){
+                VNF tVnf = new VNF(nf.getID(),nf.getVNFtype(),nf.getVNFcapacity());
+                tVnf.cost = nf.cost;
+                tVnf.setPrice(nf.getprice());
+                tVnf.setState(nf.getState());
+                tVnf.embedID = nf.embedID;
+                tVnf.embedVnfID = nf.embedVnfID;
+
+                sc.VNFset.add(tVnf);
+            }
+
+            for(Link ln:sfc.linkset){
+                Link TLink = new Link(ln.getid(),ln.getsrcid(),ln.getdstid(),ln.getBandwidth(),ln.getType());
+                TLink.cost = ln.cost;
+                TLink.setPrice(ln.getPrice());
+                TLink.setstate(ln.getstate());
+                TLink.setWave(ln.getWave());
+
+                sc.linkset.add(TLink);
+            }
+            res.add(sc);
         }
         return res;
     }
@@ -164,199 +198,136 @@ public class MC {
         this.osw.write("==============================================" + "\r\n");
         this.osw.write("===================before=====================" + "\r\n");
         this.osw.write("==============================================" + "\r\n");
-        this.osw.write(G.GetInfo());
-
-        //准备操作
-        Graph G_tmp ;
-        Graph G_return = new Graph();//结果存在在这里面返回
-        Graph GMin = new Graph();//存每轮的最小可能的那个结果11.26
-
-        Map<Integer,Graph> gSets = new HashMap<>();//把产生的新结果存入到这个集合里面。
-        int gFlag = 0;//标志位，有可能结果不好导致Greturn无法更新。
-        Graph dealedG = (Graph) G.deepClone();
-
-        Set<Sfc> delSfcSets = new HashSet<>();//对my.sfset的拷贝，数据操作用这个set操作
-        Set<Sfc> tmpSfcSets = new HashSet<>();//对每次更新的存储，最后赋给my.sfcsets
-        Set<Sfc> MinSfcSets = new HashSet<>();//这是min结果对应的sets
-
-
-        //MC启动,状态变化操作----》资源网络的更新Dcf
-        //对每个点进行状态预变化，最终选取产生最好的结果的点进行VNF状态变化，其他点VNF状态不变
-        for(int i=0;i<6;i++){
-            Switch tmpSW = null;
-            for(Switch tsw:dealedG.switchset){
-                if(tsw.getID() == i){
-                    tmpSW = tsw;
-                    break;
+        //this.osw.write(G.GetInfo());
+        NumsGet getnum = new NumsGet();
+        //开始操作
+        Switch TargetSw = null;
+        int targetVNFID = -1;
+        int tmpMax = Integer.MIN_VALUE;
+        //Map<Integer,Double> QsfMap = new HashMap<>();
+        for(Switch sw:G.switchset){//确定TargetSw,
+            for(VNF nf:sw.VNFset){
+                VNF tmpV = new VNF(nf.getID(),nf.getVNFtype(),nf.getVNFcapacity(),nf.cost,nf.getprice(),nf.getState(),nf.embedID,nf.VPW);
+                Set<Sfc> TmpSfcSets = copySfcSet(sfcsets);
+                nf.reverseState();//状态翻转
+                Graph TmpG = VDeploySFC(G,TmpSfcSets,enFlag);////映射,1是正序，其他数字反序
+                double ss = GetQcfValue(TmpG);
+                int tp = (int) (TmpG.getMaxUtility()*getnum.getEmbedSfcNums(TmpSfcSets));
+                if(tmpMax < tp && flagV2 != nf.getID() && flagSW2 != sw.getID()){
+                    tmpMax  = tp;
+                    TargetSw = sw;
+                    targetVNFID = nf.getID();
                 }
-            }
-        //for(Switch tmp_sw:dealedG.switchset){
-            Random r = new Random();
-            int r_id = r.nextInt(3);//从该sw的3个vnf里随机选取一个vnf来进行状态变化
-            assert tmpSW != null;//assert关键字声明一个断言。如果表达式的结果为true，那么断言为真，并且无任何行动
-            //如果表达式为false，则断言失败，则会抛出一个AssertionError对象。
-            for(VNF tmp_v:tmpSW.VNFset){
-                if(tmp_v.getID() == r_id){
-                    tmp_v.reverseState();//反转状态
-                    break;
-                }
-            }
-
-            //复制sfc集合,保证循环里面每次处理的的sfc都是没有映射的干净的sfc
-            delSfcSets.clear();
-            delSfcSets = copySfcSet(this.sfcsets);
-
-
-            //Dcf确定后，部署sfc
-            //G_tmp = RandomDeploySFC(dealedG,delSfcSets);
-            G_tmp = VDeploySFC(dealedG,delSfcSets,2);//1是正序，其他数字反序
-            gSets.put(i,G_tmp);
-
-            //转移概率*10
-            G_tmp.qcf = 10*Math.pow(Math.E,beta*(G_tmp.getMaxUtility()-G.getMaxUtility())-1);
-            if(G_tmp.qcf > 10) G_tmp.qcf = 10*1;//概率不能大于1
-
-
-            if(i == 0){//这个是确保g每次都有更新和循环外的gFlag配合。
-                G_return.cloneG(G_tmp);
-                tmpSfcSets = copySfcSet(delSfcSets);
-
-                //11.26
-                GMin.cloneG(G_tmp);
-                MinSfcSets = copySfcSet(delSfcSets);
-            }
-            //11.26
-            if(i>0 && TimerValue(GMin) > TimerValue(G_tmp)){
-                GMin.cloneG(G_tmp);
-                MinSfcSets = copySfcSet(delSfcSets);
-            }
-            ///
-
-            if(TimerValue(G_return) < TimerValue(G_tmp) ){
-                G_return.cloneG(G_tmp);
-                tmpSfcSets = copySfcSet(delSfcSets);
-                if(gFlag == 0) gFlag = 1;
-            }
-
-
-            //恢复，把这次动作恢复
-            dealedG = (Graph) G.deepClone();
-
-        }
-        GMin.existence = G.getExistence();
-        G_return.existence = G.getExistence();
-/*        //
-        //对光链路层进行资源转化操作
-        //选两个活跃节点建立或者拆除
-        Graph dealedGO = new Graph();
-        dealedGO.cloneG(G);
-
-        Collection<Link> tmp_linksets = new HashSet<>();//返回映射结果的边集装到这个里面
-        int flag_success_op = 1;//砍光路是否建立成功的。
-        int flag_r1 = 0,flag_r2 = 0;//随机选两个节点
-        Random r = new Random();
-        int r1,r2,r_b;
-        r1 = r.nextInt(dealedGO.getSwitchnum());
-        r2 = r.nextInt(dealedGO.getSwitchnum());
-        while(r1 == r2){
-            r2 = r.nextInt(dealedGO.getSwitchnum());
-        }
-
-        Collection<Link> tmp_O_lin = new HashSet<>();
-        r_b = r.nextInt(3);//任意选一个波长
-
-        //看是否已经有光通路了
-        int flag_on = 0;
-        for(Link tmp_r2:dealedGO.rlinkset){
-            if(tmp_r2.getsrcid() == r1 && tmp_r2.getdstid() == r2 && tmp_r2.getType() ==(50+r_b)){
-                flag_on = 1;
+                nf.reverseState();//把翻转状态变回来
+                nf.cost = tmpV.cost;
+                nf.setState(tmpV.getState());
+                nf.embedVnfID = tmpV.embedVnfID;
+                nf.embedID = tmpV.embedID;
             }
         }
-        //更新操作，开了的关，关了的开。
-        if(flag_on == 0){//没有光通路，建立光通路
-            for(Olink tmp:dealedGO.olinkset){
-                if(tmp.getWave() == r_b && tmp.getstate() == 0){
-                    tmp_O_lin.add(new Link(tmp.getid(), tmp.getsrcid(), tmp.getdstid(), tmp.getBandwidth(), tmp.getType()));
-                }
-            }
-            tmp_linksets = dijkstra(r1, r2, tmp_O_lin, dealedGO.getSwitchnum());//找出r1,r2之间的最短路
-            for(Link l2:tmp_linksets){
-                if(l2.getid() == Max){//无最短路
-                    flag_success_op = 0;
-                    // System.out.println("光通路建立这里，失败了");
-                    break;
-                }
-            }
-
-            if(flag_success_op == 1){//给光通路设置价格
-                int tmp_price = 0;
-                if(tmp_linksets.size() > 1){
-                    tmp_price = (tmp_linksets.size()-1)*2 + 40;//收发节点40，中继节点2
-                }else{
-                    tmp_price = 40;
-                }
-
-                for(Link tmp_l:tmp_linksets){//建立通路
-                    for(Olink tmp:dealedGO.olinkset){
-                        if(tmp.getWave() == r_b && tmp.getid() == tmp_l.getid()){
-                            tmp.setstate(1);
-                            int tpID=0;
-                            for(Link ll:dealedGO.rlinkset){
-                                tpID += ll.getid();
-                            }
-                            tmp.rlinkID = tpID;//dealedG.rlinkset.size();//标记这些已用，并且标记其参与搭建的rlink
-                            break;
+        ///
+        Collection<Link> resLinkstes = new HashSet<>();
+        for(int m=0;m<G.getSwitchnum();m++){
+            for(int n=0;n<G.getSwitchnum();n++){
+                Random r = new Random();
+                int w = r.nextInt(1) + 1;
+                if(m != n && !hasLink(resLinkstes,m,n,51)){
+                    Collection<Link> tpLinkstes = new HashSet<>();
+                    for(Olink oln:G.olinkset){
+                        if(oln.getWave() == w && oln.getstate()==0){
+                            tpLinkstes.add(oln);
                         }
                     }
-                }
-                dealedGO.rlinkset.add(new Link(dealedGO.rlinkset.size(), r1, r2, 2000, 50+r_b, tmp_price));
-            }
-        }else{//有光通路，拆除 //olink里存路径搭建信息和对应的rlink ID号，拆的时候按ID来排查拆除。
-            int tmp_rid = Max;
-            Iterator i = dealedGO.rlinkset.iterator();
-            //Link tmp_rl = new Link();
-            while(i.hasNext()){
-                Link tmp_rl = (Link) i.next();
-                if(tmp_rl.getType() == (50+r_b) && tmp_rl.getsrcid() == r1 &&tmp_rl.getdstid() == r2){
-                    tmp_rid = tmp_rl.getid();
-                    i.remove();
-                }
-            }
-            for(Olink tmp:dealedGO.olinkset){
-                if(tmp.rlinkID == tmp_rid && tmp.getWave()== r_b){
-                    tmp.rlinkID = Max;
-                    tmp.setstate(0);
+                    Collection<Link> tpr = dijkstra(m, n, tpLinkstes, G.switchset.size());
+                    if(tpr.size() != 0){
+                        int id = 200;
+                        while (G.rlinkset.contains(new Link(id,m,n,2000,51))){
+                            id = 200 + r.nextInt(50);
+                        }
+                        G.rlinkset.add(new Link(id,m,n,2000,51,tpr,w));
+                    }
                 }
             }
         }
-        //Dcf确定后，部署sfc
-        G_tmp = deploy_SFC(dealedGO,sfcsets);
+        ///
+        Set<Sfc> EnbSfcSets = copySfcSet(sfcsets);
+        int flagO=0;
+        int MnId=-1;
 
-        if(TimerValue(G_return) < TimerValue(G_tmp)){
-            G_return.cloneG(G_tmp);
+        for(Link rl:G.rlinkset){
+            if(rl.getType() >= 50){
+                Link tmpL = new Link(rl.getid(),rl.getsrcid(),rl.getdstid(),rl.cost,rl.getPrice(),rl.getBandwidth(),rl.getstate(),rl.getType(),rl.getWave(),rl.getO_total_price());
+                Set<Sfc> TmpSfcSets = copySfcSet(sfcsets);
+                rl.reverseState();//状态翻转
+                Graph TmpG = VDeploySFC(G,TmpSfcSets,enFlag);//映射
+                int tp = (int) (TmpG.getMaxUtility()*getnum.getEmbedSfcNums(TmpSfcSets));
+                if(tmpMax < tp && flagOPath2 != G.getOpenOpathNum()){
+                    flagO = 1;
+                    tmpMax  = tp;
+                    MnId = rl.getid();
+                }
+                rl.reverseState();//状态翻转回来
+                rl.setstate(tmpL.getstate());
+                rl.cost = tmpL.cost;
+            }
         }
-
-        //*/
-
-        Random gr = new Random();//
-        if(gr.nextDouble() < 1-TimerValue(GMin)){
-            gFlag = 2;
-        }
-
-        if(gFlag == 0){//如果结果都不好，就随机选一个状态
-            Random nr = new Random();
-            G_return.cloneG(gSets.get(nr.nextInt(6)));
-        }
-        else if(gFlag == 2){
-            sfcsets = copySfcSet(MinSfcSets);
-            G = (Graph) GMin.deepClone();
+        flagV2 = flagV1;
+        flagSW2 = flagSW1;
+        double T=0.0;
+        if(flagO == 0){
+            //已经确认SW和VNF
+            assert TargetSw != null;
+            for(VNF nf:TargetSw.VNFset){//选择该VNF进行状态反转，并且更新cf
+                if(nf.getID() == targetVNFID){
+                    nf.reverseState();
+                    break;
+                }
+            }
+            flagV1 = targetVNFID;
+            flagSW1 = TargetSw.getID();
         }else{
-            //最终结果的拷贝更新。
-            sfcsets = copySfcSet(tmpSfcSets);
-            G = (Graph) G_return.deepClone();
+            for(Link rl:G.rlinkset){
+                if(rl.getid() == MnId && rl.getType() >= 50){
+                    rl.reverseState();
+                    if(rl.getstate() == 1){
+                        for(Olink oln:G.olinkset){
+                            if(oln.getWave() ==rl.getWave() && rl.usedOpathSet.contains(oln)){
+                                oln.setstate(1);
+                            }
+                        }
+                    }else{
+                        for(Olink oln:G.olinkset){
+                            if(oln.getWave() ==rl.getWave() && rl.usedOpathSet.contains(oln)){
+                                oln.setstate(0);
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+            Graph Gd = new Graph();
+            Gd.cloneG(G);
+            for(Link rl:Gd.rlinkset){
+                if(rl.getType() >= 50 && rl.getstate() == 0){
+                    G.rlinkset.remove(rl);
+                }
+            }
+
+            flagV1 = -1;
+            flagOPath2 = flagOPath1;
+            flagOPath1 = G.getOpenOpathNum();
         }
 
+        G = VDeploySFC(G,EnbSfcSets,enFlag);
+        T = 1/GetQcfValue(G);
+        G.existence = GetRandomExponentialTimer(T);
 
+
+        sfcsets = copySfcSet(EnbSfcSets);
+
+
+
+        //操作结束，打印资源的信息，图G的。网络信息
         this.osw.write("==============================================" + "\r\n");
         this.osw.write("====================after=====================" + "\r\n");
         this.osw.write("==============================================" + "\r\n");
@@ -367,135 +338,136 @@ public class MC {
 
     }
 
-    public double TimerValue(Graph graph){
+    double GetRandomExponentialTimer(double lamda){
+        double time = 0.0;
+        //Math.random()产生0-1随机数，Math.log e为底的对数。
+        Random r = new Random();
+        time = -(1 / lamda) * Math.log(r.nextDouble());
+        //time = -(1 / lamda) * Math.log(Math.random());
+        //time = -(1 / lamda) * Math.log(1-Math.random());
+        return time;
+    }
+
+    void IniSFCsSets(Collection<Sfc> SFCsets){
+        for(Sfc sf:SFCsets){
+            sf.setState(0);
+            for(VNF vf:sf.VNFset){
+                vf.embedID = 100000;
+                vf.embedVnfID = 100000;
+                vf.setState(0);
+            }
+            for(Link ln:sf.linkset){
+                ln.setstate(0);
+            }
+        }
+    }
+
+
+    Link GetLink(Collection<Link> set,int m,int n,int type){
+        Link resLink = new Link();
+        for(Link l:set){
+            if(l.getsrcid() == m && l.getdstid() == n &&l.getType() == type){
+                resLink = l;
+            }
+        }
+        return resLink;
+    }
+
+    boolean hasLink(Collection<Link> set,int m,int n,int type){
+        for(Link l:set){
+            if(l.getsrcid() == m && l.getdstid() == n &&l.getType() == type){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    double GetTs(Switch s, Collection<Sfc> SFCsets) throws Exception {
+        double SumOfQcf=1;
+        NumsGet getnum = new NumsGet();///可以删
+
+        for(VNF nf:s.VNFset){
+            Set<Sfc> TmpSfcSets = copySfcSet(SFCsets);
+            //状态翻转
+            VNF tmpV = new VNF(nf.getID(),nf.getVNFtype(),nf.getVNFcapacity(),nf.cost,nf.getprice(),nf.getState(),nf.embedID,nf.VPW);
+            nf.reverseState();
+            //映射
+            Graph TmpG = VDeploySFC(G,TmpSfcSets,enFlag);//1是正序，其他数字反序
+            //
+            this.osw.write("sfc这1次部署结果: " + getnum.getEmbedSfcNums(TmpSfcSets) + "  " );
+            //
+            SumOfQcf += GetQcfValue(TmpG);//计算Qcf
+            nf.reverseState();//把翻转状态变回来
+            nf.cost = tmpV.cost;
+            nf.setState(tmpV.getState());
+            nf.embedVnfID = tmpV.embedVnfID;
+            nf.embedID = tmpV.embedID;
+
+        }
+        this.osw.write("\r\n");
+        return 1/SumOfQcf;
+
+    }
+
+    int GetSWMaxV(Switch s, Collection<Sfc> SFCsets) throws Exception {
+        NumsGet getnum = new NumsGet();///可以删
+        int res = Integer.MIN_VALUE;
+
+        for(VNF nf:s.VNFset){
+            Set<Sfc> TmpSfcSets = copySfcSet(SFCsets);
+            //状态翻转
+            VNF tmpV = new VNF(nf.getID(),nf.getVNFtype(),nf.getVNFcapacity(),nf.cost,nf.getprice(),nf.getState(),nf.embedID,nf.VPW);
+            nf.reverseState();
+            //映射
+            Graph TmpG = VDeploySFC(G,TmpSfcSets,enFlag);//1是正序，其他数字反序
+            int tpm = TmpG.getMaxUtility();
+            if(res < tpm){
+                res = tpm;
+            }
+            this.osw.write( " VNF部署结果: " + tpm + "  SFC结果: " + getnum.getEmbedSfcNums(TmpSfcSets));
+
+            nf.reverseState();//把翻转状态变回来
+            nf.cost = tmpV.cost;
+            nf.setState(tmpV.getState());
+            nf.embedVnfID = tmpV.embedVnfID;
+            nf.embedID = tmpV.embedID;
+
+        }
+        return res;
+    }
+
+    double GetTo(Link mn, Collection<Sfc> SFCsets) throws Exception {
+        double SumOfQcf=0.0;
+        //状态翻转
+        mn.reverseState();
+        //映射
+        Graph TmpG = VDeploySFC(G,SFCsets,enFlag);//1是正序，其他数字反序
+        SumOfQcf += GetQcfValue(TmpG);//计算Qcf
+        //把翻转状态变回来
+        mn.reverseState();
+        return 1/SumOfQcf;
+    }
+
+    double GetQcfValue(Graph graph){
         double value ;
         double qf1_to_f2;
-        //double index_1 ;
-        //
-        //System.out.println("graph.getMaxUtility()的值：" + graph.getMaxUtility());
-        //
+
         if(graph.switchset.isEmpty()){
-            //value = -9999999;
             value = 0;
             System.out.println("本次有空G" );
         }else{
-            //qf1_to_f2 = Math.exp((0.001*beta*(graph.getMaxUtility()-5)));//-1000
-            qf1_to_f2 = Math.pow(Math.E, beta*(graph.getMaxUtility() - G.getMaxUtility()));
-            value = qf1_to_f2;//value = qf1_to_f2*graph.sfc_num;//先暂时这样。
+            qf1_to_f2 = Math.pow(Math.E, 0.5*beta*(graph.getMaxUtility() - G.getMaxUtility())-1);
+            value = qf1_to_f2;
         }
 
-        //System.out.println("这次TimerValue的值：" + value);
         return value;
     }
 
     void printSfcState(OutputStreamWriter osw) throws IOException {
-        for(Sfc sfc:this.sfcsets){
+        for(Sfc sfc:sfcsets){
             osw.write("SFC-ID是："+sfc.ID+"===>>>>状态：" + sfc.getState());
             osw.write("\r\n");
         }
-    }
-
-    Graph RandomDeploySFC(Graph G, Collection<Sfc> SFCsets){//随机选择一个SW的点，映射该VNF。
-        Graph Gdesfc = new Graph();
-        Gdesfc.cloneG(G);
-
-        Graph graph = new Graph();
-
-        Collection<Link> tmpESets = new HashSet<>();//存带宽合适的边
-        Collection<Link> DijESets ;//DijESets = new HashSet<>();
-        Random r = new Random();
-
-        for(Sfc tmp_sfc:SFCsets){
-            //取出一条sfc进行映射操作
-            graph.cloneG(Gdesfc);//每次映射先复制一份网络，对复制的网络操作
-            //先映射点
-            int flagSfc=1;
-            for(VNF sfcVNF:tmp_sfc.VNFset){
-                int enID = r.nextInt(7);
-                Set<Integer> set = new HashSet<>();
-                while (sfcVNF.embedID == Max && set.size() < 6){
-                    enVNF(graph.switchset,enID,sfcVNF);
-                    if(sfcVNF.embedID != Max) break;
-                    else{
-                        set.add(enID);
-                        enID = r.nextInt(7);
-                    }
-                }
-
-                if(sfcVNF.embedID == Max){
-                    flagSfc = 0;
-                    break;
-                }
-            }
-            if(flagSfc == 0) {
-//                System.out.println("它的点映射失败了！ ");
-                continue;//失败就跳过这次映射
-            }
-//            System.out.println("它的点映射成功了！ 开始进行边映射");
-            //映射边
-            int LFindFlag;
-            for(Link sfcLink:tmp_sfc.linkset){
-                LFindFlag = 0;
-                for(VNF tmpVNFsrc:tmp_sfc.VNFset){
-                    for(VNF tmpVNFdst:tmp_sfc.VNFset){
-                        if(tmpVNFsrc.getID() == sfcLink.getsrcid() && tmpVNFdst.getID() == sfcLink.getdstid()){
-                            LFindFlag = 1;
-                            if(tmpVNFsrc.embedID == tmpVNFdst.embedID && tmpVNFdst.embedID != Max){
-                                sfcLink.setstate(1);//表示映射成功
-//                                System.out.println("VNFsrc: "+ tmpVNFsrc.getID() + " VNFdst" + tmpVNFdst.getID() +"映射到了同一个点");
-                            }//else{
-                            if(tmpVNFsrc.embedID != tmpVNFdst.embedID && tmpVNFdst.embedID != Max && tmpVNFsrc.embedID != Max){
-//                                System.out.println("VNFsrc: "+ tmpVNFsrc.getID() + " VNFdst" + tmpVNFdst.getID() +"没有映射到了同一个点");
-                                for(Link gRlink:graph.rlinkset){//找出带宽合适的边
-                                    if((gRlink.getBandwidth() - gRlink.cost) >= sfcLink.getBandwidth()){
-                                        tmpESets.add(gRlink);
-                                    }
-                                }
-                                //找路dijkstra
-                                DijESets = dijkstra(tmpVNFsrc.embedID,tmpVNFdst.embedID,tmpESets,6);
-                                for(Link dlink:DijESets){
-                                    if(dlink.getid() == Max){
-//                                        System.out.println("两个点找路失败了！");
-                                        flagSfc = 0;//映射失败
-                                    }
-                                }
-                                if(flagSfc != 0){//找路成功，更新资源
-                                    sfcLink.setstate(1);
-                                    /*
-                                   System.out.println("找路成功了");
-                                   System.out.println("这次边映射用了这些边：");
-                                   */
-                                    for(Link e1:DijESets){
-//                                      System.out.println(e1.getid());
-                                        for(Link e2:graph.rlinkset){
-                                            if(e1.getid() == e2.getid()){
-                                                sfcLink.usedLinkSet.add(e2);//新加，把使用过的边的信息存入，sfclink.
-                                                e2.cost += sfcLink.getBandwidth();
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                                DijESets.clear();
-                                break;
-                            }
-                        }
-                    }
-                    if(LFindFlag == 1) break;
-                }
-                tmpESets.clear();
-                if(flagSfc == 0) break;
-            }
-
-            if(flagSfc == 0){
-                //continue;
-            }else{
-                Gdesfc.cloneG(graph);
-                tmp_sfc.setState(1);
-            }
-        }
-
-        return Gdesfc;
     }
 
     public void enVNF(Collection<Switch> swSet,int ID,VNF sfcVNF){
@@ -527,28 +499,12 @@ public class MC {
         for(Sfc tmp_sfc:SFCsets){
             //取出一条sfc进行映射操作
             graph.cloneG(G_desfc);//每次映射先复制一份网络，对复制的网络操作
+            Map<Integer,Integer> VNFMap = new HashMap<>();
             //先映射点
             int flagSfc=1;
             for(VNF sfcVNF:tmp_sfc.VNFset){
-                List<Switch> SWList = new ArrayList<>(graph.switchset);
-                if(flag == 1){
-                    SWList.sort(new Comparator<Switch>() {
-                        @Override
-                        public int compare(Switch o1, Switch o2) {
-                            return Integer.compare(o1.getID(), o2.getID());
-                        }
-                    });
-                }else{
-                    SWList.sort(new Comparator<Switch>() {
-                        @Override
-                        public int compare(Switch o1, Switch o2) {
-                            return Integer.compare(o2.getID(), o1.getID());
-                        }
-                    });
-                }
-
-                ///
-                for(Switch sw:SWList){
+                VNFMap.put(sfcVNF.getID(),sfcVNF.cost);
+                for(Switch sw:graph.switchset){
                     if(sw.getstate() == 1){
                         List<VNF> VNFList = new ArrayList<>(sw.VNFset);
                         VNFList.sort(new Comparator<VNF>() {
@@ -568,19 +524,6 @@ public class MC {
                     }
                     if(sfcVNF.embedID != Max) break;
                 }
-                /*for(Switch sw:graph.switchset){
-                    if(sw.getstate() == 1){
-                        for(VNF swVNF:sw.VNFset){
-                            if(swVNF.getVNFtype() == sfcVNF.getVNFtype() && (swVNF.VNFcapacity-swVNF.cost)>=sfcVNF.VNFcapacity &&swVNF.getState() == 1){
-                                swVNF.cost += sfcVNF.VNFcapacity;
-                                sfcVNF.embedID = sw.getID();
-                                sfcVNF.embedVnfID = swVNF.getID();
-                                break;
-                            }
-                        }
-                    }
-                    if(sfcVNF.embedID != Max) break;
-                }*/
                 if(sfcVNF.embedID == Max){
                     flagSfc = 0;
                     break;
@@ -592,8 +535,33 @@ public class MC {
             }
 //            System.out.println("它的点映射成功了！ 开始进行边映射");
             //映射边
+            List<Link> linkList = new ArrayList<>(tmp_sfc.linkset);
+            if(flag == 1){
+                linkList.sort(new Comparator<Link>() {
+                    @Override
+                    public int compare(Link o1, Link o2) {
+                        return Integer.compare(VNFMap.get(o1.getsrcid())+VNFMap.get(o1.getdstid()), VNFMap.get(o2.getsrcid())+VNFMap.get(o2.getdstid()));
+                    }
+                });
+            }else if(flag == 2){
+                linkList.sort(new Comparator<Link>() {
+                    @Override
+                    public int compare(Link o1, Link o2) {
+                        return Integer.compare(o1.getBandwidth(), o2.getBandwidth());
+                    }
+                });
+            }else{
+                linkList.sort(new Comparator<Link>() {
+                    @Override
+                    public int compare(Link o1, Link o2) {
+                        return Integer.compare(o1.getBandwidth()/(1+VNFMap.get(o1.getsrcid())+VNFMap.get(o2.getdstid())), o2.getBandwidth()/(1+VNFMap.get(o2.getsrcid())+VNFMap.get(o2.getdstid())));
+                    }
+                });
+            }
+
             int LFindFlag;
-            for(Link sfcLink:tmp_sfc.linkset){
+            //for(Link sfcLink:tmp_sfc.linkset){
+            for(Link sfcLink:linkList){
                 LFindFlag = 0;
                 for(VNF tmpVNFsrc:tmp_sfc.VNFset){
                     for(VNF tmpVNFdst:tmp_sfc.VNFset){
@@ -601,20 +569,17 @@ public class MC {
                             LFindFlag = 1;
                             if(tmpVNFsrc.embedID == tmpVNFdst.embedID && tmpVNFdst.embedID != Max){
                                 sfcLink.setstate(1);//表示映射成功
-//                                System.out.println("VNFsrc: "+ tmpVNFsrc.getID() + " VNFdst" + tmpVNFdst.getID() +"映射到了同一个点");
                             }//else{
                             if(tmpVNFsrc.embedID != tmpVNFdst.embedID && tmpVNFdst.embedID != Max && tmpVNFsrc.embedID != Max){
-//                                System.out.println("VNFsrc: "+ tmpVNFsrc.getID() + " VNFdst" + tmpVNFdst.getID() +"没有映射到了同一个点");
                                 for(Link gRlink:graph.rlinkset){//找出带宽合适的边
-                                    if((gRlink.getBandwidth() - gRlink.cost) >= sfcLink.getBandwidth()){
+                                    if(gRlink.getstate() == 1 && (gRlink.getBandwidth() - gRlink.cost) >= sfcLink.getBandwidth()){
                                         tmpESets.add(gRlink);
                                     }
                                 }
                                 //找路dijkstra
-                                DijESets = dijkstra(tmpVNFsrc.embedID,tmpVNFdst.embedID,tmpESets,6);
+                                DijESets = dijkstra(tmpVNFsrc.embedID,tmpVNFdst.embedID,tmpESets,G.switchset.size());
                                 for(Link dlink:DijESets){
                                     if(dlink.getid() == Max){
-//                                        System.out.println("两个点找路失败了！");
                                         flagSfc = 0;//映射失败
                                     }
                                 }
@@ -622,7 +587,6 @@ public class MC {
                                     sfcLink.setstate(1);
 
                                     for(Link e1:DijESets){
-//                                      System.out.println(e1.getid());
                                         for(Link e2:graph.rlinkset){
                                             if(e1.getid() == e2.getid()){
                                                 sfcLink.usedLinkSet.add(e2);//新加，把使用过的边的信息存入，sfclink.

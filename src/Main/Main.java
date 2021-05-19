@@ -15,35 +15,38 @@ import graph.VNF;
 
 public class Main {
     public static void main(String[] args) {
-        int simulateTimes = 1;//选择仿真次数。
+        int simulateTimes = 5;//选择仿真次数。
         for(int j=0;j<simulateTimes;j++){
             try{
                 PrintStream ps = new PrintStream("C:\\Users\\91191\\Desktop\\G_print" + j + ".txt");
                 System.setOut(ps);
 
+                String GReadFile = "C:\\Users\\91191\\Desktop\\MC1.6\\txt\\USnet.txt";
+                File GInfoFile = new File("C:\\Users\\91191\\Desktop\\MC1.6\\txt\\GInfo.txt");
                 //打印资源的信息，图G的。网络信息
-                File GInfoFile = new File("C:\\Users\\91191\\Desktop\\MC1.2\\txt\\GInfo.txt");
                 FileOutputStream fos = new FileOutputStream(GInfoFile);
                 OutputStreamWriter osw = new OutputStreamWriter(fos);
 
                 NumsGet getnum = new NumsGet();
-                Graph G1 = new Graph(1);//创建标准图，G1是底层图
+                //Graph G1 = new Graph(1);//创建标准图，G1是底层图
+                Graph G1 = new Graph(GReadFile);//按txt生成图
 
                 G1.CreateRGraph();//初始化资源网络边。
 
-                String fileSfcPath = "C:\\Users\\91191\\Desktop\\MC1.2\\txt\\sfcs.txt";
-                String fileSfcPath2 = "C:\\Users\\91191\\Desktop\\MC1.2\\txt\\MINIsfcs.txt";
-                String fileSfcPath3 = "C:\\Users\\91191\\Desktop\\MC1.2\\txt\\sfcEmbeddingInfo.txt";
+                String fileSfcPath = "C:\\Users\\91191\\Desktop\\MC1.6\\txt\\sfcs.txt";
+                //String fileSfcPath2 = "C:\\Users\\91191\\Desktop\\MC1.6\\txt\\MINIsfcs.txt";
+                String fileSfcPath3 = "C:\\Users\\91191\\Desktop\\MC1.6\\txt\\sfcEmbeddingInfo.txt";
 
 
-                //Collection<Sfc> sfcset = FileCreateSfc(fileSfcPath);
-                Collection<Sfc> MiniSfcSet = FileCreateSfc(fileSfcPath2);
-                //Collection<Sfc> MiniSfcSet = CreateSFC(5);
-                //Collection<Sfc> sfcset = CreateSFC(60);//需求是300条SFC
-                //getSfcs(fileSfcPath2,MiniSfcSet);  //把产生的sfc打印到txt
+                int enFlag = 3;//映射flag=1,2,3
+                Collection<Sfc> sfcset = FileCreateSfc(fileSfcPath);
+                //Collection<Sfc> MiniSfcSet = FileCreateSfc(fileSfcPath2);//txt里有固定的sfcs
+                //Collection<Sfc> sfcset = CreateSFC(60);
+                //getSfcs(fileSfcPath,sfcset);  //把产生的sfc打印到txt
 
-                MC myMC = new MC(G1, MiniSfcSet);//这里输入G和sfcset，然后运行MC
+                MC myMC = new MC(G1, sfcset);//这里输入G和sfcset，然后运行MC
                 myMC.osw = osw;
+                myMC.enFlag = enFlag;
 
                 myMC.osw.write("**********************************");
                 myMC.osw.write("\r\n");
@@ -59,8 +62,23 @@ public class Main {
                 int count = 1;
 
 
-                while(count < 150){
+                while(count < 200){
                     //************测试************
+                    Iterator i = myMC.G.switchset.iterator();
+                    if(i.hasNext()){
+                        System.out.print("总收益："+myMC.G.getMaxUtility());
+                        System.out.print("    存在时间："+myMC.G.existence);
+                        System.out.print("    成功部署的sfc数量：" +getnum.getEmbedSfcNums(myMC.sfcsets));
+                        System.out.print("    开启的VNF数目："+myMC.G.getOpenVNFNum());
+                        System.out.print("    开启的光通路数目："+myMC.G.getOpenOpathNum());
+                        System.out.println("    负收益："+myMC.G.getNegUtility());
+                        myMC.G.em_flag = 0;///新加进去的
+                        myMC.IniSFCsSets(myMC.sfcsets);
+                        myMC.G.RecoverResourceCapacity();
+                        myMC.MCstart();
+                    }else{
+                        System.out.println("第 " + count + "次的G是空的！");
+                    }
                     myMC.osw.write("\r\n");
                     myMC.osw.write("**********************************");
                     myMC.osw.write("\r\n");
@@ -68,18 +86,6 @@ public class Main {
                     myMC.osw.write("\r\n");
                     myMC.osw.write("**********************************");
                     myMC.osw.write("\r\n");
-                    Iterator i = myMC.G.switchset.iterator();
-                    if(i.hasNext()){
-                        System.out.print("总收益："+myMC.G.getMaxUtility());
-                        //System.out.print("    存在时间："+myMC.G.getExistence());
-                        System.out.print("    存在时间："+exiR(myMC.G.existence,myMC.G.getExistence())*getnum.getEmbedSfcNums(myMC.sfcsets)/myMC.sfcsets.size());
-                        System.out.print("    转移概率："+myMC.G.qcf);
-                        System.out.println("    成功部署的sfc数量：" +getnum.getEmbedSfcNums(myMC.sfcsets));
-                        myMC.G.em_flag = 0;///新加进去的
-                        myMC.MCstart();
-                    }else{
-                        System.out.println("第 " + count + "次的G是空的！");
-                    }
                     count++;
                 }
                 getEmbeddingInfo(fileSfcPath3, myMC.sfcsets);

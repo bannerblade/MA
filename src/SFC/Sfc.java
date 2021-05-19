@@ -24,18 +24,20 @@ public class Sfc implements Serializable {
 		int tmp_src = Max;
 		int tmp_now = Max;
 
+
 		//添加VNF,且要防止链的两头VNF一样
 		for(int j=0;j<VNFnum;j++){
 			tmp_now = r.nextInt(5);
 			while(tmp_now == tmp_src){
 				tmp_now = r.nextInt(5);
 			}
-			VNFset.add(new VNF(j,tmp_now,r.nextInt(5) + 2));
+			//VNF(int ID,int VNFtype, int VNFcapacity)
+			VNFset.add(new VNF(j,tmp_now,r.nextInt(5)*2 + 10));
 			tmp_src = tmp_now;
 		}
 		//添加SFC的有向边,通过VNF ID关联
 		for(int j = 0; j<(VNFnum -1); j++){
-			linkset.add(new Link(j,j,j+1,r.nextInt(6)+5,3));
+			linkset.add(new Link(j,j,j+1,r.nextInt(5)*6+10,3));
 		}
 	}
 

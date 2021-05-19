@@ -13,7 +13,8 @@ public class VNF implements Serializable {
     private int VNFtype; //假定有5种type：0，1，2，3，4
     public int VNFcapacity;//VNF容量，直接算作CPU使用资源量。
     public int cost = 0;//vnf资源正在使用的量
-    private int price;//单位资源收益1000~1400
+    private int price=1;//单位资源收益，默认1，再switch初始化的时候会更改
+    public int psh=1;//单位损耗
     private int state;//VNF的状态，这个是图用的，SFC不用。
     public int embedID = Max;//存映射到的那个点的ID
     public int embedVnfID = Max;//存映射到的那个点的vnf-ID
@@ -84,6 +85,9 @@ public class VNF implements Serializable {
     public void reverseState(){
         if(this.getState() == 1){//节点VNF状态更新
             this.setState(0);
+            this.cost = 0;
+            this.embedID = Max;
+            this.embedVnfID =Max;
         }else{
             this.setState(1);
         }
